@@ -4,6 +4,8 @@ import pygal
 from pygal import Config
 import os, ssl
 import numpy as np
+from pygal.style import Style
+
 
 app = Flask(__name__)
 
@@ -72,7 +74,7 @@ def plot_age_range():
     #create a df
     df_age = pd.DataFrame.from_dict({'age_range':['< 20','20s', '30s', '40s',
                                                   '50s', '60s', '70s','80+'],
-                                 'cases': [6,35,28,54,69,77,46,29]})
+                                 'cases': [9,43,35,67,87,96,58,37]})
     # add up the total cases and find % of total in each age range
     total_count = df_age.cases.sum()
     df_age['percent_of_tot'] = df_age.cases/total_count*100
@@ -95,8 +97,7 @@ def plot_case_status():
     df_state_tot = create_maine_daily_totals_df()
 
     # add a recovered column from the Press Herald data
-    df_state_tot['recovered']=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,16,24,36,41,41,68,80]
-
+    df_state_tot['recovered']=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,16,24,36,41,41,68,80, 94]
     #calculate active case counts
     df_state_tot['active_cases'] = df_state_tot.cases - df_state_tot.deaths - df_state_tot.recovered
 
