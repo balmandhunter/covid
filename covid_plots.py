@@ -2,6 +2,7 @@ from flask import Flask
 import pandas as pd
 import pygal
 from pygal import Config
+from pygal.style import Style
 import os, ssl
 import numpy as np
 from pygal.style import Style
@@ -36,7 +37,7 @@ def create_maine_daily_totals_df():
     return df_state_tot
 
 def create_maine_most_recent_df():
-    # make a df for the Maine data from the NY Times
+    ''' make a df for the Maine data from the NY Times'''
     df_maine = create_maine_df()
     # make a df for the most recent day's data
     df_maine_today = df_maine[df_maine.date == df_maine.date.max()]
@@ -68,6 +69,47 @@ def create_population_df():
     df_population = pd.DataFrame.from_dict(population_data, orient='index',columns=['population'])
 
     return df_population
+
+def get_custom_style():
+    custom_style = Style(
+    colors=['#85144B', '#111111', '#7FDBFF', '#39CCCC', '#3D9970', '#2ECC40', '#01FF70',
+            '#FFDC00', '#FF851B', '#FF4136', '#F012BE', '#B10DC9', '#00008b', '#0074D9',
+            '#6e6e6e', '#9e9e9e', '#dbdbdb'],
+    label_font_size=14,
+    major_guide_stroke_dasharray= '1.5,1.5'
+    )
+
+    return custom_style
+
+def case_by_county_config():
+    config = Config()
+    custom_style = get_custom_style()
+    config.style=custom_style
+    config.x_label_rotation=20
+    config.show_minor_x_labels=False
+    config.y_labels_major_every=3
+    config.show_minor_y_labels=False
+    config.truncate_legend=-1
+
+    return config
+
+def create_days_to_double_data(df, days_to_double):
+    cases= [1]
+    n_days = len(df.date.unique())
+    d = range(1,len(df.date.unique()))
+    for day in d:
+        cases.append(round(2**(day/days_to_double),2))
+    return cases
+
+def plot_county_lines(df_maine, line_chart):
+    for county in df_maine.county.unique():
+        if len(list(df_maine.date.unique())) == len(df_maine[df_maine.county==county].cases):
+            case_data = df_maine[df_maine.county==county].cases
+        else:
+            len_diff = len(list(df_maine.date.unique())) - len(df_maine[df_maine.county==county].cases)
+            case_data = df_maine[df_maine.county==county].cases.to_list()
+            case_data = [0]*len_diff + case_data
+        line_chart.add(county, case_data, dots_size=1.5)
 
 @app.route('/age_range.svg')
 def plot_age_range():
@@ -196,3 +238,48 @@ def plot_county_cases_per_capita():
     bar_chart.add('Cases per 100,000 People', df_maine_today.cases_per_hundred_thousand.to_list())
 
     return bar_chart.render_response()
+
+@app.route('/growth_by_county.svg')
+def plot_growth_by_county():
+    df_maine = create_maine_df()
+
+    config = case_by_county_config()
+    line_chart = pygal.Line(config,
+                        y_title='Number of Cases',
+                        height=500,
+                        width=700)
+    line_chart.title = 'COVID-19 Case Growth by County'
+    line_chart.x_labels = list(df_maine.date.unique())
+    line_chart.x_labels_major = list(df_maine.date.unique())[0::3]
+    #add a line for each county
+    plot_county_lines(df_maine, line_chart)
+
+    return line_chart.render_response()
+
+@app.route('/growth_by_county_log.svg')
+def plot_growth_by_county_log():
+    # Import the data
+    df_maine = create_maine_df()
+    # Setup Configuration
+    config = case_by_county_config()
+    # Plot the data
+    line_chart = pygal.Line(config,
+                        y_title='Cases',
+                        logarithmic=True,
+                        height=500,
+                        width=800                       )
+    line_chart.title = 'COVID-19 Case Growth by County (log scale)'
+    line_chart.x_labels = list(df_maine.date.unique())
+    line_chart.x_labels_major = list(df_maine.date.unique())[0::3]
+    #add a line for each county
+    plot_county_lines(df_maine, line_chart)
+    # Set the stoke style for the reference lines and plot them
+    ref_style = stroke_style={'width':2.5}
+    line_chart.add('Cases Double every 4 Days', create_days_to_double_data(df_maine, 4),
+                  stroke_style=ref_style, dots_size=1)
+    line_chart.add('Cases Double every 5 Days', create_days_to_double_data(df_maine, 5),
+                   stroke_style=ref_style, dots_size=1)
+    line_chart.add('Cases Double every Week', create_days_to_double_data(df_maine, 7),
+                   stroke_style=ref_style, dots_size=1)
+
+    return line_chart.render_response()
