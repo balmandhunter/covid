@@ -111,6 +111,13 @@ def plot_county_lines(df_maine, line_chart):
             case_data = [0]*len_diff + case_data
         line_chart.add(county, case_data, dots_size=1.5)
 
+def append_recovered_data(df):
+    recovered = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,16,24,36,41,41,68,80,94]
+    if len(recovered) != len(df):
+        recovered.append(np.nan)
+    df['recovered'] = recovered
+    return df
+
 @app.route('/age_range.svg')
 def plot_age_range():
     #create a df
@@ -127,7 +134,8 @@ def plot_age_range():
                       show_legend=False,
                       y_title='Percent of Cases (%)',
                       x_title='Age Group')
-    bar_chart.title = 'Case Distribution by Patient Age'
+    # title_text = 'Case Distribution by Patient Age' + ' (' + str(df_maine_today.date.max()) + ')'
+    bar_chart.title = 'Case Distribution by Patient Age (April 3, 2020)'
     bar_chart.x_labels = df_age.age_range
     bar_chart.add('% of Cases', df_age.percent_of_tot.to_list())
 
@@ -139,8 +147,7 @@ def plot_case_status():
     df_state_tot = create_maine_daily_totals_df()
 
     # add a recovered column from the Press Herald data
-    df_state_tot['recovered']=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,16,24,36,41,41,68,80, 94]
-    #calculate active case counts
+    df_state_tot = append_recovered_data(df_state_tot)
     df_state_tot['active_cases'] = df_state_tot.cases - df_state_tot.deaths - df_state_tot.recovered
 
     # plot the daily total cases, deaths, and recovered
@@ -213,8 +220,8 @@ def plot_current_cases_by_county():
 
     return bar_chart.render_response()
 
-@app.route('/cases_per_capita.svg')
-def plot_county_cases_per_capita():
+@app.route('/cases_per_ten_thousand_res.svg')
+def plot_cases_per_ten_thousand_res():
     # make a df of the population of Maine counties based on US Census Data
     df_population = create_population_df()
     # make a df for the most recent day's NY Times data for Maine
@@ -222,20 +229,23 @@ def plot_county_cases_per_capita():
     # add the population data to the NY Times Data
     df_maine_today = df_maine_today.merge(df_population, left_on='county', right_index=True)
     # calculate cases per 100,000 residents
-    df_maine_today['cases_per_hundred_thousand'] = df_maine_today.cases/ \
-                                                    (df_maine_today.population/100000)
-    df_maine_today = df_maine_today.round({'cases_per_hundred_thousand':0})
+    df_maine_today['cases_per_ten_thousand'] = df_maine_today.cases/ \
+                                                    (df_maine_today.population/10000)
+    df_maine_today = df_maine_today.round({'cases_per_ten_thousand':1})
+    # Drop the Unknown county row
+    unknown_idx = df_maine_today[df_maine_today.county=='Unknown'].index
+    df_maine_today = df_maine_today.drop(labels=unknown_idx, axis=0)
 
     # plot the data
     bar_chart = pygal.Bar(x_label_rotation=20,
                           show_legend=False,
-                          y_title='Cases per 100,000 Residents',
+                          y_title='Cases per 10,000 Residents',
                           x_title='County')
-    title_text = 'COVID-19 Cases per 100,000 Residents' + ' (' + \
+    title_text = 'COVID-19 Cases per 10,000 Residents' + ' (' + \
                   str(df_maine_today.date.max()) + ')'
     bar_chart.title = title_text
     bar_chart.x_labels = df_maine_today.county.to_list()
-    bar_chart.add('Cases per 100,000 People', df_maine_today.cases_per_hundred_thousand.to_list())
+    bar_chart.add('Cases per 10,000 People', df_maine_today.cases_per_ten_thousand.to_list())
 
     return bar_chart.render_response()
 
