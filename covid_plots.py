@@ -245,7 +245,7 @@ def plot_cases_per_ten_thousand_res():
                   str(df_maine_today.date.max()) + ')'
     bar_chart.title = title_text
     bar_chart.x_labels = df_maine_today.county.to_list()
-    bar_chart.add('Cases per 10,000 People', df_maine_today.cases_per_ten_thousand.to_list())
+    bar_chart.add('Cases per 10,000 Residents', df_maine_today.cases_per_ten_thousand.to_list())
 
     return bar_chart.render_response()
 
