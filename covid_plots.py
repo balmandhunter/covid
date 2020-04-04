@@ -118,15 +118,18 @@ def plot_county_lines(df_maine, line_chart):
 
 def append_recovered_data(df):
     recovered = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,16,24,36,41,41,68,80,94,113]
-    if len(recovered) != len(df):
+    while len(recovered) < len(df):
         recovered.append(np.nan)
     df['recovered'] = recovered
     return df
 
 
 def get_hospitalized(df):
-    hospitalized=[None,None,None,None,None,None,None,None,None,49,57,63,68,75]
+    hospitalized=[None,None,None,None,None,None,None,None,None,None,49,57,63,68,75]
     df_hosp = df[df.index > '2020-03-19']
+
+    while len(df_hosp) > len(hospitalized):
+        hospitalized.append(None)
 
     return hospitalized, df_hosp
 
@@ -399,6 +402,28 @@ def plot_hospitalization():
     # make a df with the total cases, deaths for each day
     df_state_tot = create_maine_daily_totals_df()
     hospitalized, df_hosp = get_hospitalized(df_state_tot)
+
+    custom_style = Style(
+        colors=['#08519c', '#3182bd'],
+        label_font_size=14,
+        major_guide_stroke_dasharray= '1.5,1.5'
+    )
+
+    line_chart = pygal.Line(style=custom_style,
+                            include_x_axis=True,
+                            x_label_rotation=20,
+                            show_minor_x_labels=False,
+                            y_labels_major_every=2,
+                            show_minor_y_labels=False,
+                            truncate_legend=-1,
+                            x_title = 'Date')
+    line_chart.title = 'Patients Ever Hospitalized for COVID-19 in Maine'
+    line_chart.x_labels = df_hosp.index.values.tolist()
+    line_chart.x_labels_major = df_hosp.index.values.tolist()[0::2]
+    line_chart.add('Total Hospitalized', hospitalized,
+                   stroke_style={'dasharray': '3, 6', 'width':2.5})
+
+    return line_chart.render_response()
 
 
 @app.route('/ventilators.svg')
