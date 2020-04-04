@@ -377,7 +377,7 @@ def plot_growth_by_county_log():
     plot_county_lines(df_maine, line_chart)
     # Set the stoke style for the reference lines and plot them
     ref_style = stroke_style={'width':2.5}
-    line_chart.add('Cases Double every 4 Days', create_days_to_double_data(df_maine, 4),
+    line_chart.add('Cases Double every 3 Days', create_days_to_double_data(df_maine, 3),
                   stroke_style=ref_style, dots_size=1)
     line_chart.add('Cases Double every 5 Days', create_days_to_double_data(df_maine, 5),
                    stroke_style=ref_style, dots_size=1)
