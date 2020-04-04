@@ -245,7 +245,7 @@ def plot_new_cases():
                       show_legend=False,
                       y_title = 'Number of New Cases',
                       x_title = 'Day')
-    bar_chart.title = 'Daily New COVID-19 Cases in Maine'
+    bar_chart.title = 'New COVID-19 Cases in Maine per Day'
     bar_chart.x_labels = df_state_tot.index.values.tolist()
     bar_chart.x_labels_major = df_state_tot.index.values.tolist()[0::3]
     bar_chart.add('Number of New Cases', df_state_tot.new_cases.to_list())
