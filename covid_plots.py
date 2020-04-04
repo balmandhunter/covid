@@ -124,6 +124,13 @@ def append_recovered_data(df):
     return df
 
 
+def get_hospitalized(df):
+    hospitalized=[None,None,None,None,None,None,None,None,None,49,57,63,68,75]
+    df_hosp = df[df.index > '2020-03-19']
+
+    return hospitalized, df_hosp
+
+
 def find_occupied_assets(the_dict, total_asset, available_asset, return_col_name='occupied'):
     occupied_asset = []
     for idx in range(0, len(the_dict['date'])):
@@ -385,6 +392,13 @@ def plot_growth_by_county_log():
                    stroke_style=ref_style, dots_size=1)
 
     return line_chart.render_response()
+
+
+@app.route('/hospitalization.svg')
+def plot_hospitalization():
+    # make a df with the total cases, deaths for each day
+    df_state_tot = create_maine_daily_totals_df()
+    hospitalized, df_hosp = get_hospitalized(df_state_tot)
 
 
 @app.route('/ventilators.svg')
