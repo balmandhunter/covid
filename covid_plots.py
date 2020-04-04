@@ -272,6 +272,25 @@ def plot_deaths():
 
     return bar_chart.render_response()
 
+@app.route('/new_deaths.svg')
+def plot_new_deaths():
+    # make a df with the total cases, deaths for each day
+    df_state_tot = create_maine_daily_totals_df()
+
+    df_state_tot['new_deaths'] = df_state_tot.deaths.diff()
+    df_state_tot['new_deaths'][0] = 0
+
+    bar_chart = pygal.Bar(x_label_rotation=20,
+                      show_minor_x_labels=False,
+                      show_legend=False,
+                      y_title = 'Number of New Deaths')
+    bar_chart.title = 'New COVID-19 Deaths in Maine per Day'
+    dates = df_state_tot.index.values.tolist()
+    bar_chart.x_labels = dates
+    bar_chart.x_labels_major = dates[0::3]
+    bar_chart.add('Number of New Deaths', df_state_tot.new_deaths.to_list())
+
+    return bar_chart.render_response()
 
 @app.route('/cases_by_county.svg')
 def plot_current_cases_by_county():
