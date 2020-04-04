@@ -77,7 +77,7 @@ def get_custom_style():
     custom_style = Style(
     colors=['#85144B', '#111111', '#7FDBFF', '#39CCCC', '#3D9970', '#2ECC40', '#01FF70',
             '#FFDC00', '#FF851B', '#FF4136', '#F012BE', '#B10DC9', '#00008b', '#0074D9',
-            '#6e6e6e', '#9e9e9e', '#dbdbdb'],
+            '#85144B', '#7FDBFF', '#6e6e6e', '#9e9e9e', '#dbdbdb'],
     label_font_size=14,
     major_guide_stroke_dasharray= '1.5,1.5'
     )
@@ -207,6 +207,9 @@ def plot_age_range():
 
 @app.route('/case_status.svg')
 def plot_case_status():
+    custom_style = Style(
+        colors=['#3F51B5', '#F44336', '#009688']
+    )
     # create a df with total cases and deaths in Maine for each day
     df_state_tot = create_maine_daily_totals_df()
 
@@ -215,7 +218,7 @@ def plot_case_status():
     df_state_tot['active_cases'] = df_state_tot.cases - df_state_tot.deaths - df_state_tot.recovered
 
     # plot the daily total cases, deaths, and recovered
-    bar_chart = pygal.StackedBar(x_label_rotation=20, show_minor_x_labels=False)
+    bar_chart = pygal.StackedBar(style=custom_style, x_label_rotation=20, show_minor_x_labels=False)
     bar_chart.title = 'Maine COVID-19 Cases by Status'
     bar_chart.x_labels = df_state_tot.index.values.tolist()
     bar_chart.x_labels_major = df_state_tot.index.values.tolist()[0::3]
