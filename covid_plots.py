@@ -125,13 +125,13 @@ def append_recovered_data(df):
 
 
 def get_hospitalized(df):
-    hospitalized=[None,None,None,None,None,None,None,None,None,None,49,57,63,68,75]
-    df_hosp = df[df.index > '2020-03-19']
+    hospitalized=[None,None,None,None,None,None,None,None,None,None,49,57,63,68,75,83]
+    hosp_dates = ['2020-03-20', '2020-03-21','2020-03-22','2020-03-23','2020-03-24',
+                  '2020-03-25','2020-03-26','2020-03-27','2020-03-28','2020-03-29',
+                  '2020-03-30','2020-03-31','2020-04-01','2020-04-02','2020-04-03',
+                  '2020-04-04']
 
-    while len(df_hosp) > len(hospitalized):
-        hospitalized.append(None)
-
-    return hospitalized, df_hosp
+    return hospitalized, hosp_dates
 
 
 def find_occupied_assets(the_dict, total_asset, available_asset, return_col_name='occupied'):
@@ -401,7 +401,7 @@ def plot_growth_by_county_log():
 def plot_hospitalization():
     # make a df with the total cases, deaths for each day
     df_state_tot = create_maine_daily_totals_df()
-    hospitalized, df_hosp = get_hospitalized(df_state_tot)
+    hospitalized, hosp_dates = get_hospitalized(df_state_tot)
 
     custom_style = Style(
         colors=['#08519c', '#3182bd'],
@@ -417,9 +417,9 @@ def plot_hospitalization():
                             show_minor_y_labels=False,
                             truncate_legend=-1,
                             x_title = 'Date')
-    line_chart.title = 'Patients Ever Hospitalized for COVID-19 in Maine'
-    line_chart.x_labels = df_hosp.index.values.tolist()
-    line_chart.x_labels_major = df_hosp.index.values.tolist()[0::2]
+    line_chart.title = 'Total Patients Ever Hospitalized for COVID-19 in Maine'
+    line_chart.x_labels = hosp_dates
+    line_chart.x_labels_major = hosp_dates[0::2]
     line_chart.add('Total Hospitalized', hospitalized,
                    stroke_style={'dasharray': '3, 6', 'width':2.5})
 
