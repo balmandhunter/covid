@@ -20,6 +20,7 @@ def import_nytimes_data():
     df = pd.read_csv(url, error_bad_lines=False)
     return df
 
+
 def create_maine_df():
     ''' Make a df for just the Maine data from the NY Times'''
 
@@ -27,6 +28,7 @@ def create_maine_df():
     # make a df for the NY Times Maine data
     df_maine = df[df.state == 'Maine']
     return df_maine
+
 
 def create_maine_daily_totals_df():
     ''' Create a df with total cases and deaths in Maine for each day '''
@@ -36,6 +38,7 @@ def create_maine_daily_totals_df():
     df_state_tot = df_maine.groupby('date').sum()
     return df_state_tot
 
+
 def create_maine_most_recent_df():
     ''' make a df for the Maine data from the NY Times'''
     df_maine = create_maine_df()
@@ -43,8 +46,8 @@ def create_maine_most_recent_df():
     df_maine_today = df_maine[df_maine.date == df_maine.date.max()]
     # sort the df by case count
     df_maine_today.sort_values(by=['cases'], ascending=False, inplace=True)
-
     return df_maine_today
+
 
 def create_population_df():
     # make a dataframe of county population data
@@ -67,8 +70,8 @@ def create_population_df():
                        'Aroostook': 68269,
                        'Unknown':np.nan}
     df_population = pd.DataFrame.from_dict(population_data, orient='index',columns=['population'])
-
     return df_population
+
 
 def get_custom_style():
     custom_style = Style(
@@ -78,8 +81,8 @@ def get_custom_style():
     label_font_size=14,
     major_guide_stroke_dasharray= '1.5,1.5'
     )
-
     return custom_style
+
 
 def case_by_county_config():
     config = Config()
@@ -90,8 +93,8 @@ def case_by_county_config():
     config.y_labels_major_every=3
     config.show_minor_y_labels=False
     config.truncate_legend=-1
-
     return config
+
 
 def create_days_to_double_data(df, days_to_double):
     cases= [1]
@@ -100,6 +103,7 @@ def create_days_to_double_data(df, days_to_double):
     for day in d:
         cases.append(round(2**(day/days_to_double),2))
     return cases
+
 
 def plot_county_lines(df_maine, line_chart):
     for county in df_maine.county.unique():
@@ -111,12 +115,71 @@ def plot_county_lines(df_maine, line_chart):
             case_data = [0]*len_diff + case_data
         line_chart.add(county, case_data, dots_size=1.5)
 
+
 def append_recovered_data(df):
     recovered = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,16,24,36,41,41,68,80,94]
     if len(recovered) != len(df):
         recovered.append(np.nan)
     df['recovered'] = recovered
     return df
+
+
+def find_occupied_assets(the_dict, total_asset, available_asset, return_col_name='occupied'):
+    occupied_asset = []
+    for idx in range(0, len(the_dict['date'])):
+        if the_dict[total_asset][idx] is not None and the_dict[available_asset][idx] is not None:
+            occupied_asset.append(the_dict[total_asset][idx] - the_dict[available_asset][idx])
+        else:
+            occupied_asset.append(None)
+
+    the_dict[return_col_name] = occupied_asset
+    return the_dict
+
+
+def find_total_vent_including_alt(the_dict):
+    total_vent_including_alt = []
+    for idx in range(0, len(the_dict['date'])):
+        if the_dict['total_ventilators'][idx] is not None and the_dict['alternative_ventilators'][idx] is not None:
+            total_vent_including_alt.append(the_dict['total_ventilators'][idx] + the_dict['alternative_ventilators'][idx])
+        else:
+            total_vent_including_alt.append(None)
+
+    the_dict['total_vent_including_alt'] = total_vent_including_alt
+    return the_dict
+
+
+def create_hospital_assets_dict():
+    hosp_assets_dict = {'date':['2020-03-20','2020-03-21', '2020-03-22', '2020-03-23','2020-03-24',
+                            '2020-03-25','2020-03-26','2020-03-27','2020-03-28','2020-03-29',
+                            '2020-03-30','2020-03-31', '2020-04-01','2020-04-02','2020-04-03'],
+                         'total_icu_beds':[135, None, None, None, None,
+                                           151, 151, 164, None, None,
+                                           176, 190, 272, 285, 289],
+                         'available_icu_beds': [56, None, None, None, 77,
+                                                83, 86, 86, None, None,
+                                                92, 90, 124, 122, 110],
+                         'total_ventilators':[291, None, None, None, None,
+                                              306, 307, 308, None, None,
+                                              309, 330, 348, 334, 324],
+                         'available_ventilators':[218, None, None, None, 248,
+                                                  248, 250, 247, None, None,
+                                                  253, 262, 271, 266, 267],
+                         'alternative_ventilators':[None, None, None, None, None,
+                                                    None, None, 58, None, None,
+                                                    87, 89, 128, 186, 199],
+                         'respiratory_therapists':[None, None, None, None, 84,
+                                                   88, None, None, None, None,
+                                                   None, None, None, None, 127]
+                        }
+    # Calculate the number of occupied ICU Beds
+    hosp_assets_dict = find_occupied_assets(hosp_assets_dict, 'total_icu_beds', 'available_icu_beds',
+                                            return_col_name='occupied_icu_beds')
+    hosp_assets_dict = find_occupied_assets(hosp_assets_dict, 'total_ventilators', 'available_ventilators',
+                                            return_col_name='occupied_ventilators')
+    hosp_assets_dict = find_total_vent_including_alt(hosp_assets_dict)
+
+    return hosp_assets_dict
+
 
 @app.route('/age_range.svg')
 def plot_age_range():
@@ -141,6 +204,7 @@ def plot_age_range():
 
     return bar_chart.render_response()
 
+
 @app.route('/case_status.svg')
 def plot_case_status():
     # create a df with total cases and deaths in Maine for each day
@@ -161,6 +225,7 @@ def plot_case_status():
     bar_chart.add('Recovered Cases', df_state_tot.recovered.values.tolist())
 
     return bar_chart.render_response()
+
 
 @app.route('/new_cases_maine.svg')
 def plot_new_cases():
@@ -184,6 +249,7 @@ def plot_new_cases():
 
     return bar_chart.render_response()
 
+
 @app.route('/total_deaths.svg')
 def plot_deaths():
     # make a df with the total cases, deaths for each day
@@ -203,6 +269,7 @@ def plot_deaths():
 
     return bar_chart.render_response()
 
+
 @app.route('/cases_by_county.svg')
 def plot_current_cases_by_county():
     # make a df for the most recent day's data
@@ -219,6 +286,7 @@ def plot_current_cases_by_county():
     bar_chart.add('Cases', df_maine_today.cases.to_list())
 
     return bar_chart.render_response()
+
 
 @app.route('/cases_per_ten_thousand_res.svg')
 def plot_cases_per_ten_thousand_res():
@@ -249,6 +317,7 @@ def plot_cases_per_ten_thousand_res():
 
     return bar_chart.render_response()
 
+
 @app.route('/growth_by_county.svg')
 def plot_growth_by_county():
     df_maine = create_maine_df()
@@ -265,6 +334,7 @@ def plot_growth_by_county():
     plot_county_lines(df_maine, line_chart)
 
     return line_chart.render_response()
+
 
 @app.route('/growth_by_county_log.svg')
 def plot_growth_by_county_log():
@@ -291,5 +361,71 @@ def plot_growth_by_county_log():
                    stroke_style=ref_style, dots_size=1)
     line_chart.add('Cases Double every Week', create_days_to_double_data(df_maine, 7),
                    stroke_style=ref_style, dots_size=1)
+
+    return line_chart.render_response()
+
+
+@app.route('/ventilators.svg')
+def plot_ventilators():
+    hosp_assets_dict = create_hospital_assets_dict()
+
+    custom_style = Style(
+        colors=['#08519c', '#3182bd', '#6baed6'],
+        label_font_size=14,
+        major_guide_stroke_dasharray= '1.5,1.5',
+        legend_font_size= 10
+    )
+
+    line_chart = pygal.Line(style=custom_style,
+                            dots_size=2,
+                            x_label_rotation=20,
+                            show_minor_x_labels=False,
+                            y_labels_major_every=2,
+                            show_minor_y_labels=False,
+                            width=750,
+                            height=400,
+                            truncate_legend=-1
+                           )
+
+    line_chart.title = 'Statewide Ventilator Availablity'
+    line_chart.x_labels = hosp_assets_dict['date']
+    line_chart.x_labels_major = hosp_assets_dict['date'][0::3]
+
+    line_chart.add('Total Ventilators (including alternative)', hosp_assets_dict['total_vent_including_alt'],
+                   stroke_style={'width':2.5}, show_dots=1, dots_size=1)
+    line_chart.add('Total Traditional Ventilators', hosp_assets_dict['total_ventilators'],
+                   stroke_style={'width':2.5}, show_dots=1, dots_size=1)
+    line_chart.add('Occupied Ventilators', hosp_assets_dict['occupied_ventilators'],
+                  stroke_style={'dasharray': '3, 6', 'width':2.5})
+
+    return line_chart.render_response()
+
+
+@app.route('/icu_beds.svg')
+def plot_icu_beds():
+    hosp_assets_dict = create_hospital_assets_dict()
+
+    custom_style = Style(
+        colors=['#08519c', '#3182bd'],
+        label_font_size=14,
+        major_guide_stroke_dasharray= '1.5,1.5'
+    )
+
+    line_chart = pygal.Line(style=custom_style,
+                            dots_size=2.5,
+                            x_label_rotation=20,
+                            truncate_legend=-1,
+                            show_minor_x_labels=False,
+                            y_labels_major_every=2,
+                            show_minor_y_labels=False
+                            )
+    line_chart.title = 'Statewide ICU Bed Availablity'
+    line_chart.x_labels = hosp_assets_dict['date']
+    line_chart.x_labels_major = hosp_assets_dict['date'][0::3]
+
+    line_chart.add('Total ICU Beds', hosp_assets_dict['total_icu_beds'], stroke_style={'width':2.5},
+                   show_dots=1, dots_size=1)
+    line_chart.add('Occupied ICU Beds', hosp_assets_dict['occupied_icu_beds'],
+                   stroke_style={'dasharray': '3, 6', 'width':2.5})
 
     return line_chart.render_response()
