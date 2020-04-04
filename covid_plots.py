@@ -117,7 +117,7 @@ def plot_county_lines(df_maine, line_chart):
 
 
 def append_recovered_data(df):
-    recovered = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,16,24,36,41,41,68,80,94]
+    recovered = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,16,24,36,41,41,68,80,94,113]
     if len(recovered) != len(df):
         recovered.append(np.nan)
     df['recovered'] = recovered
