@@ -96,7 +96,7 @@ def plot_county_lines(df_maine, line_chart):
 
 
 def append_recovered_data(df):
-    recovered = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,16,24,36,41,41,68,80,94,113]
+    recovered = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,16,24,36,41,41,68,80,94,113,140]
     while len(recovered) < len(df):
         recovered.append(np.nan)
     df['recovered'] = recovered
@@ -196,7 +196,7 @@ def plot_age_range():
     #create a df
     df_age = pd.DataFrame.from_dict({'age_range':['< 20','20s', '30s', '40s',
                                                   '50s', '60s', '70s','80+'],
-                                 'cases': [10,43,37,74,91,99,64,38]})
+                                 'cases': [11,43,40,80,93,101,64,38]})
     # add up the total cases and find % of total in each age range
     total_count = df_age.cases.sum()
     df_age['percent_of_tot'] = df_age.cases/total_count*100
@@ -208,7 +208,7 @@ def plot_age_range():
                           y_title='Percent of Cases (%)',
                           x_title='Age Group')
     # title_text = 'Case Distribution by Patient Age' + ' (' + str(df_maine_today.date.max()) + ')'
-    bar_chart.title = 'Case Distribution by Patient Age (April 3, 2020)'
+    bar_chart.title = 'Case Distribution by Patient Age (April 5, 2020)'
     bar_chart.x_labels = df_age.age_range
     bar_chart.add('% of Cases', df_age.percent_of_tot.to_list())
 
