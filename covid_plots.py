@@ -308,21 +308,30 @@ def plot_new_cases(size):
 
     return bar_chart.render_response()
 
+@app.route('/total_deaths.svg/', defaults={'size':'large'})
+@app.route('/total_deaths.svg/<size>')
+def plot_deaths(size):
+    if size == 'small':
+        custom_style = small_style_bar()
+        custom_style.title_font_size = 26
+        date_skip = 5
+    else:
+        custom_style = large_style_bar()
+        date_skip = 3
 
-@app.route('/total_deaths.svg')
-def plot_deaths():
     # make a df with the total cases, deaths for each day
     df_state_tot = create_maine_daily_totals_df()
 
     # plot death data
-    bar_chart = pygal.Bar(x_label_rotation=20,
+    bar_chart = pygal.Bar(style=custom_style,
+                          x_label_rotation=20,
                           show_minor_x_labels=False,
                           show_legend=False,
                           y_title='Total Number of Deaths')
     bar_chart.title = 'Total COVID-19 Deaths in Maine'
     dates = df_state_tot.index.values.tolist()
     bar_chart.x_labels = dates
-    bar_chart.x_labels_major = dates[0::3]
+    bar_chart.x_labels_major = dates[0::date_skip]
 
     bar_chart.add('Total Deaths', df_state_tot.deaths.values.tolist())
 
