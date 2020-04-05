@@ -191,8 +191,87 @@ def create_hospital_assets_dict():
     return hosp_assets_dict
 
 
+def get_custom_style(size):
+    if size=='small':
+        custom_style = Style(
+            colors=['#85144B', '#111111', '#7FDBFF', '#39CCCC', '#3D9970', '#2ECC40', '#01FF70',
+                    '#FFDC00', '#FF851B', '#FF4136', '#F012BE', '#B10DC9', '#00008b', '#0074D9',
+                    '#85144B', '#7FDBFF', '#6e6e6e', '#9e9e9e', '#dbdbdb'],
+            label_font_size=18,
+            major_guide_stroke_dasharray= '1.5,1.5',
+            title_font_size=24,
+            major_label_font_size=20,
+            legend_font_size=18
+        )
+    else:
+        custom_style = Style(
+            colors=['#85144B', '#111111', '#7FDBFF', '#39CCCC', '#3D9970', '#2ECC40', '#01FF70',
+                    '#FFDC00', '#FF851B', '#FF4136', '#F012BE', '#B10DC9', '#00008b', '#0074D9',
+                    '#85144B', '#7FDBFF', '#6e6e6e', '#9e9e9e', '#dbdbdb'],
+            label_font_size=12,
+            major_guide_stroke_dasharray= '1.5,1.5',
+            title_font_size=18,
+            major_label_font_size=14,
+            legend_font_size=13
+        )
+    return custom_style
+
+
+def line_config(size):
+    if size=='small':
+        config = Config()
+        custom_style = get_custom_style(size)
+        config.style=custom_style
+        config.x_label_rotation=40
+        config.show_minor_x_labels=False
+        config.y_labels_major_every=3
+        config.show_minor_y_labels=False
+        config.truncate_legend=-1
+    else:
+        config = Config()
+        custom_style = get_custom_style(size)
+        config.style=custom_style
+        config.x_label_rotation=20
+        config.show_minor_x_labels=False
+        config.y_labels_major_every=3
+        config.show_minor_y_labels=False
+        config.truncate_legend=-1
+    return config
+
+
+def get_custom_style_assets(size):
+        if size=='small':
+            custom_style = Style(
+                colors=['#08519c', '#3182bd'],
+                label_font_size=18,
+                major_guide_stroke_dasharray= '1.5,1.5',
+                title_font_size=26,
+                major_label_font_size=24,
+                legend_font_size=24
+            )
+        else:
+            custom_style = Style(
+                colors=['#08519c', '#3182bd'],
+                label_font_size=14,
+                major_guide_stroke_dasharray= '1.5,1.5',
+                title_font_size=18,
+                major_label_font_size=14,
+                legend_font_size=13
+            )
+        return custom_style
+
+
 @app.route('/age_range.svg')
-def plot_age_range():
+@sizes
+def plot_age_range(size):
+    if size == 'small':
+        custom_style = small_style_bar()
+        custom_style.title_font_size = 26
+        date_rot = 20
+    else:
+        custom_style = large_style_bar()
+        date_rot = 20
+
     #create a df
     df_age = pd.DataFrame.from_dict({'age_range':['< 20','20s', '30s', '40s',
                                                   '50s', '60s', '70s','80+'],
@@ -203,7 +282,8 @@ def plot_age_range():
     df_age = df_age.round({'percent_of_tot':1})
 
     # create a bar chart of the age range data
-    bar_chart = pygal.Bar(x_label_rotation=20,
+    bar_chart = pygal.Bar(style=custom_style,
+                          x_label_rotation=date_rot,
                           show_legend=False,
                           y_title='Percent of Cases (%)',
                           x_title='Age Group')
@@ -351,7 +431,7 @@ def plot_current_cases_by_county(size):
     if size == 'small':
         custom_style = small_style_bar()
         custom_style.title_font_size = 26
-        custom_style.label_font_size = 18
+        custom_style.label_font_size = 20
         x_rot = 40
     else:
         custom_style = large_style_bar()
@@ -414,55 +494,6 @@ def plot_cases_per_ten_thousand_res(size):
     bar_chart.add('Cases per 10,000 Residents', df_maine_today.cases_per_ten_thousand.to_list())
 
     return bar_chart.render_response()
-
-
-
-def get_custom_style(size):
-    if size=='small':
-        custom_style = Style(
-            colors=['#85144B', '#111111', '#7FDBFF', '#39CCCC', '#3D9970', '#2ECC40', '#01FF70',
-                    '#FFDC00', '#FF851B', '#FF4136', '#F012BE', '#B10DC9', '#00008b', '#0074D9',
-                    '#85144B', '#7FDBFF', '#6e6e6e', '#9e9e9e', '#dbdbdb'],
-            label_font_size=18,
-            major_guide_stroke_dasharray= '1.5,1.5',
-            title_font_size=24,
-            major_label_font_size=20,
-            legend_font_size=18
-        )
-    else:
-        custom_style = Style(
-            colors=['#85144B', '#111111', '#7FDBFF', '#39CCCC', '#3D9970', '#2ECC40', '#01FF70',
-                    '#FFDC00', '#FF851B', '#FF4136', '#F012BE', '#B10DC9', '#00008b', '#0074D9',
-                    '#85144B', '#7FDBFF', '#6e6e6e', '#9e9e9e', '#dbdbdb'],
-            label_font_size=12,
-            major_guide_stroke_dasharray= '1.5,1.5',
-            title_font_size=18,
-            major_label_font_size=14,
-            legend_font_size=13
-        )
-    return custom_style
-
-
-def line_config(size):
-    if size=='small':
-        config = Config()
-        custom_style = get_custom_style(size)
-        config.style=custom_style
-        config.x_label_rotation=40
-        config.show_minor_x_labels=False
-        config.y_labels_major_every=3
-        config.show_minor_y_labels=False
-        config.truncate_legend=-1
-    else:
-        config = Config()
-        custom_style = get_custom_style(size)
-        config.style=custom_style
-        config.x_label_rotation=20
-        config.show_minor_x_labels=False
-        config.y_labels_major_every=3
-        config.show_minor_y_labels=False
-        config.truncate_legend=-1
-    return config
 
 
 @app.route('/growth_by_county.svg')
@@ -551,16 +582,27 @@ def plot_growth_by_county_log(size):
 
 
 @app.route('/hospitalization.svg')
-def plot_hospitalization():
+@sizes
+def plot_hospitalization(size):
+    custom_style = get_custom_style_assets(size)
+
+    if size == 'small':
+        leg_pos = True
+        date_skip = 5
+        space_sz = 38
+        custom_style.legend_font_size = 28
+        custom_style.title_font_size = 30
+        custom_style.major_label_font_size=26
+    else:
+        leg_pos=False
+        date_skip = 5
+        space_sz = 20
+        custom_style.legend_font_size = 18
+
     # make a df with the total cases, deaths for each day
     df_state_tot = create_maine_daily_totals_df()
     hospitalized, hosp_dates = get_hospitalized(df_state_tot)
 
-    custom_style = Style(
-        colors=['#08519c', '#3182bd'],
-        label_font_size=14,
-        major_guide_stroke_dasharray= '1.5,1.5'
-    )
 
     line_chart = pygal.Line(style=custom_style,
                             include_x_axis=True,
@@ -569,10 +611,12 @@ def plot_hospitalization():
                             y_labels_major_every=2,
                             show_minor_y_labels=False,
                             truncate_legend=-1,
-                            x_title = 'Date')
+                            legend_at_bottom=leg_pos,
+                            spacing=space_sz,
+                            legend_at_bottom_columns=2)
     line_chart.title = 'Total Patients Ever Hospitalized for COVID-19 in Maine'
     line_chart.x_labels = hosp_dates
-    line_chart.x_labels_major = hosp_dates[0::2]
+    line_chart.x_labels_major = hosp_dates[0::date_skip]
     line_chart.add('Total Hospitalized', hospitalized,
                    stroke_style={'dasharray': '3, 6', 'width':2.5})
 
@@ -580,15 +624,29 @@ def plot_hospitalization():
 
 
 @app.route('/ventilators.svg')
-def plot_ventilators():
-    hosp_assets_dict = create_hospital_assets_dict()
+@sizes
+def plot_ventilators(size):
+    custom_style = get_custom_style_assets(size)
 
-    custom_style = Style(
-        colors=['#08519c', '#3182bd', '#6baed6'],
-        label_font_size=14,
-        major_guide_stroke_dasharray= '1.5,1.5',
-        legend_font_size= 10
-    )
+    if size == 'small':
+        leg_pos = True
+        date_skip = 5
+        space_sz = 34
+        custom_style.colors=['#08519c', '#3182bd', '#6baed6']
+        the_width=700
+        the_height=800
+        custom_style.title_font_size = 28
+        custom_style.legend_font_size = 22
+    else:
+        leg_pos=False
+        date_skip = 5
+        space_sz = 14
+        custom_style.legend_font_size= 10
+        custom_style.colors=['#08519c', '#3182bd', '#6baed6']
+        the_width=750
+        the_height=400
+
+    hosp_assets_dict = create_hospital_assets_dict()
 
     line_chart = pygal.Line(style=custom_style,
                             dots_size=2,
@@ -596,14 +654,17 @@ def plot_ventilators():
                             show_minor_x_labels=False,
                             y_labels_major_every=2,
                             show_minor_y_labels=False,
-                            width=750,
-                            height=400,
-                            truncate_legend=-1
+                            truncate_legend=-1,
+                            legend_at_bottom=leg_pos,
+                            spacing=space_sz,
+                            legend_at_bottom_columns=1,
+                            height=the_height,
+                            width=the_width,
                            )
 
     line_chart.title = 'Statewide Ventilator Availablity'
     line_chart.x_labels = hosp_assets_dict['date']
-    line_chart.x_labels_major = hosp_assets_dict['date'][0::3]
+    line_chart.x_labels_major = hosp_assets_dict['date'][0::date_skip]
 
     line_chart.add('Total Ventilators (including alternative)', hosp_assets_dict['total_vent_including_alt'],
                    stroke_style={'width':2.5}, show_dots=1, dots_size=1)
@@ -616,14 +677,29 @@ def plot_ventilators():
 
 
 @app.route('/icu_beds.svg')
-def plot_icu_beds():
-    hosp_assets_dict = create_hospital_assets_dict()
+@sizes
+def plot_icu_beds(size):
+    custom_style = get_custom_style_assets(size)
 
-    custom_style = Style(
-        colors=['#08519c', '#3182bd'],
-        label_font_size=14,
-        major_guide_stroke_dasharray= '1.5,1.5'
-    )
+    if size == 'small':
+        leg_pos = True
+        date_skip = 4
+        space_sz = 34
+        the_width=700
+        the_height=800
+        custom_style.legend_font_size = 26
+        custom_style.title_font_size = 28
+    else:
+        leg_pos=False
+        date_skip = 4
+        space_sz = 14
+        custom_style.legend_font_size= 12
+        the_width=650
+        the_height=400
+        custom_style.title_font_size = 16
+        custom_style.major_label_font_size=12
+
+    hosp_assets_dict = create_hospital_assets_dict()
 
     line_chart = pygal.Line(style=custom_style,
                             dots_size=2.5,
@@ -631,11 +707,16 @@ def plot_icu_beds():
                             truncate_legend=-1,
                             show_minor_x_labels=False,
                             y_labels_major_every=2,
-                            show_minor_y_labels=False
+                            show_minor_y_labels=False,
+                            legend_at_bottom=leg_pos,
+                            spacing=space_sz,
+                            legend_at_bottom_columns=1,
+                            height=the_height,
+                            width=the_width,
                             )
     line_chart.title = 'Statewide ICU Bed Availablity'
     line_chart.x_labels = hosp_assets_dict['date']
-    line_chart.x_labels_major = hosp_assets_dict['date'][0::3]
+    line_chart.x_labels_major = hosp_assets_dict['date'][0::date_skip]
 
     line_chart.add('Total ICU Beds', hosp_assets_dict['total_icu_beds'], stroke_style={'width':2.5},
                    show_dots=1, dots_size=1)
