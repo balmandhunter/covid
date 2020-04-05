@@ -397,8 +397,19 @@ def plot_current_cases_by_county(size):
     return bar_chart.render_response()
 
 
-@app.route('/cases_per_ten_thousand_res.svg')
-def plot_cases_per_ten_thousand_res():
+@app.route('/cases_per_ten_thousand_res.svg/', defaults={'size':'large'})
+@app.route('/cases_per_ten_thousand_res.svg/<size>')
+def plot_cases_per_ten_thousand_res(size):
+    if size == 'small':
+        custom_style = small_style_bar()
+        custom_style.title_font_size = 24
+        custom_style.label_font_size = 18
+        x_rot=40
+    else:
+        custom_style = large_style_bar()
+        date_skip = 3
+        x_rot=30
+
     # make a df of the population of Maine counties based on US Census Data
     df_population = create_population_df()
     # make a df for the most recent day's NY Times data for Maine
@@ -414,9 +425,10 @@ def plot_cases_per_ten_thousand_res():
     df_maine_today = df_maine_today.drop(labels=unknown_idx, axis=0)
 
     # plot the data
-    bar_chart = pygal.Bar(x_label_rotation=20,
+    bar_chart = pygal.Bar(style=custom_style,
+                          x_label_rotation=x_rot,
                           show_legend=False,
-                          y_title='Cases per 10,000 Residents',
+                          y_title='Cases per 10,000 People',
                           x_title='County')
     title_text = 'COVID-19 Cases per 10,000 Residents' + ' (' + \
                   str(df_maine_today.date.max()) + ')'
