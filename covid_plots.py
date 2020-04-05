@@ -7,6 +7,7 @@ import os, ssl
 import numpy as np
 from pygal.style import Style
 
+from middleware import sizes
 
 app = Flask(__name__)
 
@@ -213,8 +214,8 @@ def plot_age_range():
 
     return bar_chart.render_response()
 
-@app.route('/case_status.svg/', defaults={'size':'large'})
-@app.route('/case_status.svg/<size>')
+@app.route('/case_status.svg')
+@sizes
 def plot_case_status(size):
     if size == 'small':
         custom_style = small_style_bar()
@@ -255,8 +256,8 @@ def plot_case_status(size):
     return bar_chart.render_response()
 
 
-@app.route('/new_cases_maine.svg/', defaults={'size':'large'})
-@app.route('/new_cases_maine.svg/<size>')
+@app.route('/new_cases_maine.svg')
+@sizes
 def plot_new_cases(size):
     if size == 'small':
         custom_style = small_style_bar()
@@ -286,8 +287,8 @@ def plot_new_cases(size):
 
     return bar_chart.render_response()
 
-@app.route('/total_deaths.svg/', defaults={'size':'large'})
-@app.route('/total_deaths.svg/<size>')
+@app.route('/total_deaths.svg')
+@sizes
 def plot_deaths(size):
     if size == 'small':
         custom_style = small_style_bar()
@@ -315,9 +316,8 @@ def plot_deaths(size):
 
     return bar_chart.render_response()
 
-
-@app.route('/new_deaths.svg/', defaults={'size':'large'})
-@app.route('/new_deaths.svg/<size>')
+@app.route('/new_deaths.svg')
+@sizes
 def plot_new_deaths(size):
     if size == 'small':
         custom_style = small_style_bar()
@@ -345,9 +345,8 @@ def plot_new_deaths(size):
 
     return bar_chart.render_response()
 
-
-@app.route('/cases_by_county.svg/', defaults={'size':'large'})
-@app.route('/cases_by_county.svg/<size>')
+@app.route('/cases_by_county.svg')
+@sizes
 def plot_current_cases_by_county(size):
     if size == 'small':
         custom_style = small_style_bar()
@@ -375,8 +374,8 @@ def plot_current_cases_by_county(size):
     return bar_chart.render_response()
 
 
-@app.route('/cases_per_ten_thousand_res.svg/', defaults={'size':'large'})
-@app.route('/cases_per_ten_thousand_res.svg/<size>')
+@app.route('/cases_per_ten_thousand_res.svg')
+@sizes
 def plot_cases_per_ten_thousand_res(size):
     if size == 'small':
         custom_style = small_style_bar()
@@ -466,8 +465,8 @@ def line_config(size):
     return config
 
 
-@app.route('/growth_by_county.svg/', defaults={'size':'large'})
-@app.route('/growth_by_county.svg/<size>')
+@app.route('/growth_by_county.svg')
+@sizes
 def plot_growth_by_county(size):
     df_maine = create_maine_df()
     config = line_config(size)
@@ -501,8 +500,8 @@ def plot_growth_by_county(size):
     return line_chart.render_response()
 
 
-@app.route('/growth_by_county_log.svg/', defaults={'size':'large'})
-@app.route('/growth_by_county_log.svg/<size>')
+@app.route('/growth_by_county_log.svg')
+@sizes
 def plot_growth_by_county_log(size):
     df_maine = create_maine_df()
     config = line_config(size)
