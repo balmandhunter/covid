@@ -73,29 +73,6 @@ def create_population_df():
     return df_population
 
 
-def get_custom_style():
-    custom_style = Style(
-    colors=['#85144B', '#111111', '#7FDBFF', '#39CCCC', '#3D9970', '#2ECC40', '#01FF70',
-            '#FFDC00', '#FF851B', '#FF4136', '#F012BE', '#B10DC9', '#00008b', '#0074D9',
-            '#85144B', '#7FDBFF', '#6e6e6e', '#9e9e9e', '#dbdbdb'],
-    label_font_size=14,
-    major_guide_stroke_dasharray= '1.5,1.5'
-    )
-    return custom_style
-
-
-def case_by_county_config():
-    config = Config()
-    custom_style = get_custom_style()
-    config.style=custom_style
-    config.x_label_rotation=20
-    config.show_minor_x_labels=False
-    config.y_labels_major_every=3
-    config.show_minor_y_labels=False
-    config.truncate_legend=-1
-    return config
-
-
 def create_days_to_double_data(df, days_to_double):
     cases= [1]
     n_days = len(df.date.unique())
@@ -110,7 +87,8 @@ def plot_county_lines(df_maine, line_chart):
         if len(list(df_maine.date.unique())) == len(df_maine[df_maine.county==county].cases):
             case_data = df_maine[df_maine.county==county].cases
         else:
-            len_diff = len(list(df_maine.date.unique())) - len(df_maine[df_maine.county==county].cases)
+            len_diff = len(list(df_maine.date.unique())) - \
+                        len(df_maine[df_maine.county==county].cases)
             case_data = df_maine[df_maine.county==county].cases.to_list()
             case_data = [0]*len_diff + case_data
         line_chart.add(county, case_data, dots_size=1.5)
@@ -225,9 +203,9 @@ def plot_age_range():
 
     # create a bar chart of the age range data
     bar_chart = pygal.Bar(x_label_rotation=20,
-                      show_legend=False,
-                      y_title='Percent of Cases (%)',
-                      x_title='Age Group')
+                          show_legend=False,
+                          y_title='Percent of Cases (%)',
+                          x_title='Age Group')
     # title_text = 'Case Distribution by Patient Age' + ' (' + str(df_maine_today.date.max()) + ')'
     bar_chart.title = 'Case Distribution by Patient Age (April 3, 2020)'
     bar_chart.x_labels = df_age.age_range
@@ -362,7 +340,7 @@ def plot_new_deaths(size):
     bar_chart.title = 'New COVID-19 Deaths in Maine per Day'
     dates = df_state_tot.index.values.tolist()
     bar_chart.x_labels = dates
-    bar_chart.x_labels_major = dates[0::3]
+    bar_chart.x_labels_major = dates[0::date_skip]
     bar_chart.add('Number of New Deaths', df_state_tot.new_deaths.to_list())
 
     return bar_chart.render_response()
@@ -439,39 +417,126 @@ def plot_cases_per_ten_thousand_res(size):
     return bar_chart.render_response()
 
 
-@app.route('/growth_by_county.svg')
-def plot_growth_by_county():
-    df_maine = create_maine_df()
 
-    config = case_by_county_config()
+def get_custom_style(size):
+    if size=='small':
+        custom_style = Style(
+            colors=['#85144B', '#111111', '#7FDBFF', '#39CCCC', '#3D9970', '#2ECC40', '#01FF70',
+                    '#FFDC00', '#FF851B', '#FF4136', '#F012BE', '#B10DC9', '#00008b', '#0074D9',
+                    '#85144B', '#7FDBFF', '#6e6e6e', '#9e9e9e', '#dbdbdb'],
+            label_font_size=18,
+            major_guide_stroke_dasharray= '1.5,1.5',
+            title_font_size=24,
+            major_label_font_size=20,
+            legend_font_size=18
+        )
+    else:
+        custom_style = Style(
+            colors=['#85144B', '#111111', '#7FDBFF', '#39CCCC', '#3D9970', '#2ECC40', '#01FF70',
+                    '#FFDC00', '#FF851B', '#FF4136', '#F012BE', '#B10DC9', '#00008b', '#0074D9',
+                    '#85144B', '#7FDBFF', '#6e6e6e', '#9e9e9e', '#dbdbdb'],
+            label_font_size=12,
+            major_guide_stroke_dasharray= '1.5,1.5',
+            title_font_size=18,
+            major_label_font_size=14,
+            legend_font_size=13
+        )
+    return custom_style
+
+
+def line_config(size):
+    if size=='small':
+        config = Config()
+        custom_style = get_custom_style(size)
+        config.style=custom_style
+        config.x_label_rotation=40
+        config.show_minor_x_labels=False
+        config.y_labels_major_every=3
+        config.show_minor_y_labels=False
+        config.truncate_legend=-1
+    else:
+        config = Config()
+        custom_style = get_custom_style(size)
+        config.style=custom_style
+        config.x_label_rotation=20
+        config.show_minor_x_labels=False
+        config.y_labels_major_every=3
+        config.show_minor_y_labels=False
+        config.truncate_legend=-1
+    return config
+
+
+@app.route('/growth_by_county.svg/', defaults={'size':'large'})
+@app.route('/growth_by_county.svg/<size>')
+def plot_growth_by_county(size):
+    df_maine = create_maine_df()
+    config = line_config(size)
+    dates = list(df_maine.date.unique())
+    if size == 'small':
+        date_skip = 5
+        the_height = 800
+        the_width = 600
+        leg_pos = True
+        space_sz = 26
+    else:
+        date_skip = 5
+        the_height = 500
+        the_width = 700
+        leg_pos = False
+        space_sz = 14
+
     line_chart = pygal.Line(config,
-                        y_title='Number of Cases',
-                        height=500,
-                        width=700)
+                            y_title='Number of Cases',
+                            height=the_height,
+                            width=the_width,
+                            legend_at_bottom=leg_pos,
+                            spacing=space_sz,
+                            legend_at_bottom_columns=2)
     line_chart.title = 'COVID-19 Case Growth by County'
     line_chart.x_labels = list(df_maine.date.unique())
-    line_chart.x_labels_major = list(df_maine.date.unique())[0::3]
+    line_chart.x_labels_major = list(df_maine.date.unique())[0::date_skip]
     #add a line for each county
     plot_county_lines(df_maine, line_chart)
 
     return line_chart.render_response()
 
 
-@app.route('/growth_by_county_log.svg')
-def plot_growth_by_county_log():
+@app.route('/growth_by_county_log.svg/', defaults={'size':'large'})
+@app.route('/growth_by_county_log.svg/<size>')
+def plot_growth_by_county_log(size):
+    df_maine = create_maine_df()
+    config = line_config(size)
+    dates = list(df_maine.date.unique())
+    if size == 'small':
+        date_skip = 5
+        the_height = 1000
+        the_width = 600
+        leg_pos = True
+        space_sz = 26
+    else:
+        date_skip = 5
+        the_height = 500
+        the_width = 800
+        leg_pos = False
+        space_sz = 14
+
     # Import the data
     df_maine = create_maine_df()
     # Setup Configuration
-    config = case_by_county_config()
+    config = line_config(size)
     # Plot the data
     line_chart = pygal.Line(config,
                         y_title='Cases',
                         logarithmic=True,
-                        height=500,
-                        width=800                       )
+                        height=the_height,
+                        width=the_width,
+                        legend_at_bottom=leg_pos,
+                        spacing=space_sz,
+                        legend_at_bottom_columns=1
+                        )
     line_chart.title = 'COVID-19 Case Growth by County (log scale)'
     line_chart.x_labels = list(df_maine.date.unique())
-    line_chart.x_labels_major = list(df_maine.date.unique())[0::3]
+    line_chart.x_labels_major = list(df_maine.date.unique())[0::date_skip]
     #add a line for each county
     plot_county_lines(df_maine, line_chart)
     # Set the stoke style for the reference lines and plot them
