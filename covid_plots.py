@@ -158,6 +158,27 @@ def find_total_vent_including_alt(the_dict):
     return the_dict
 
 
+def large_style_bar():
+    custom_style = Style(
+        colors=['#3F51B5', '#F44336', '#009688'],
+        title_font_size=18,
+        label_font_size=14,
+        major_label_font_size=14,
+        legend_font_size=14
+    )
+    return custom_style
+
+def small_style_bar():
+    custom_style = Style(
+        colors=['#3F51B5', '#F44336', '#009688'],
+        title_font_size=30,
+        label_font_size=24,
+        major_label_font_size=24,
+        legend_font_size=24
+    )
+    return custom_style
+
+
 def create_hospital_assets_dict():
     hosp_assets_dict = {'date':['2020-03-20','2020-03-21', '2020-03-22', '2020-03-23','2020-03-24',
                             '2020-03-25','2020-03-26','2020-03-27','2020-03-28','2020-03-29',
@@ -218,28 +239,16 @@ def plot_age_range():
 @app.route('/case_status.svg/<size>')
 def plot_case_status(size):
     if size == 'small':
-        custom_style = Style(
-            colors=['#3F51B5', '#F44336', '#009688'],
-            title_font_size=30,
-            label_font_size=18,
-            major_label_font_size=18,
-            legend_font_size=18
-        )
-        date_skip=4
-        date_rot=30
-        leg_pos=True
+        custom_style = small_style_bar()
+        date_skip = 4
+        date_rot = 30
+        leg_pos = True
         space_sz = 30
     else:
-        custom_style = Style(
-            colors=['#3F51B5', '#F44336', '#009688'],
-            title_font_size=18,
-            label_font_size=14,
-            major_label_font_size=14,
-            legend_font_size=14
-        )
-        date_rot=20
-        date_skip=3
-        leg_pos=False
+        custom_style = large_style_bar()
+        date_rot = 20
+        date_skip = 3
+        leg_pos = False
         space_sz = 18
 
     # create a df with total cases and deaths in Maine for each day
@@ -255,7 +264,7 @@ def plot_case_status(size):
                                  show_minor_x_labels=False,
                                  legend_at_bottom=leg_pos,
                                  spacing=space_sz,
-                                 legend_at_bottom_columns=3
+                                 legend_at_bottom_columns=2
                                  )
     bar_chart.title = 'Maine COVID-19 Cases by Status'
     bar_chart.x_labels = df_state_tot.index.values.tolist()
@@ -268,8 +277,17 @@ def plot_case_status(size):
     return bar_chart.render_response()
 
 
-@app.route('/new_cases_maine.svg')
-def plot_new_cases():
+@app.route('/new_cases_maine.svg/', defaults={'size':'large'})
+@app.route('/new_cases_maine.svg/<size>')
+def plot_new_cases(size):
+    if size == 'small':
+        custom_style = small_style_bar()
+        custom_style.title_font_size = 26
+        date_skip = 5
+    else:
+        custom_style = large_style_bar()
+        date_skip = 3
+
     # make a df with the total cases, deaths for each day
     df_state_tot = create_maine_daily_totals_df()
 
@@ -278,14 +296,14 @@ def plot_new_cases():
     df_state_tot['new_cases'][0] = 1
 
     # plot new cases per day
-    bar_chart = pygal.Bar(x_label_rotation=20,
-                      show_minor_x_labels=False,
-                      show_legend=False,
-                      y_title = 'Number of New Cases',
-                      x_title = 'Day')
+    bar_chart = pygal.Bar(style=custom_style,
+                          x_label_rotation=20,
+                          show_minor_x_labels=False,
+                          show_legend=False,
+                          y_title = 'Number of New Cases')
     bar_chart.title = 'New COVID-19 Cases in Maine per Day'
     bar_chart.x_labels = df_state_tot.index.values.tolist()
-    bar_chart.x_labels_major = df_state_tot.index.values.tolist()[0::3]
+    bar_chart.x_labels_major = df_state_tot.index.values.tolist()[0::date_skip]
     bar_chart.add('Number of New Cases', df_state_tot.new_cases.to_list())
 
     return bar_chart.render_response()
