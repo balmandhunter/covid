@@ -214,12 +214,34 @@ def plot_age_range():
 
     return bar_chart.render_response()
 
+@app.route('/case_status.svg/', defaults={'size':'large'})
+@app.route('/case_status.svg/<size>')
+def plot_case_status(size):
+    if size == 'small':
+        custom_style = Style(
+            colors=['#3F51B5', '#F44336', '#009688'],
+            title_font_size=30,
+            label_font_size=18,
+            major_label_font_size=18,
+            legend_font_size=18
+        )
+        date_skip=4
+        date_rot=30
+        leg_pos=True
+        space_sz = 30
+    else:
+        custom_style = Style(
+            colors=['#3F51B5', '#F44336', '#009688'],
+            title_font_size=18,
+            label_font_size=14,
+            major_label_font_size=14,
+            legend_font_size=14
+        )
+        date_rot=20
+        date_skip=3
+        leg_pos=False
+        space_sz = 18
 
-@app.route('/case_status.svg')
-def plot_case_status():
-    custom_style = Style(
-        colors=['#3F51B5', '#F44336', '#009688']
-    )
     # create a df with total cases and deaths in Maine for each day
     df_state_tot = create_maine_daily_totals_df()
 
@@ -228,10 +250,16 @@ def plot_case_status():
     df_state_tot['active_cases'] = df_state_tot.cases - df_state_tot.deaths - df_state_tot.recovered
 
     # plot the daily total cases, deaths, and recovered
-    bar_chart = pygal.StackedBar(style=custom_style, x_label_rotation=20, show_minor_x_labels=False)
+    bar_chart = pygal.StackedBar(style=custom_style,
+                                 x_label_rotation=date_rot,
+                                 show_minor_x_labels=False,
+                                 legend_at_bottom=leg_pos,
+                                 spacing=space_sz,
+                                 legend_at_bottom_columns=3
+                                 )
     bar_chart.title = 'Maine COVID-19 Cases by Status'
     bar_chart.x_labels = df_state_tot.index.values.tolist()
-    bar_chart.x_labels_major = df_state_tot.index.values.tolist()[0::3]
+    bar_chart.x_labels_major = df_state_tot.index.values.tolist()[0::date_skip]
 
     bar_chart.add('Active Cases', df_state_tot.active_cases.values.tolist())
     bar_chart.add('Deaths', df_state_tot.deaths.values.tolist())
