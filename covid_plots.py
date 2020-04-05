@@ -337,8 +337,18 @@ def plot_deaths(size):
 
     return bar_chart.render_response()
 
-@app.route('/new_deaths.svg')
-def plot_new_deaths():
+
+@app.route('/new_deaths.svg/', defaults={'size':'large'})
+@app.route('/new_deaths.svg/<size>')
+def plot_new_deaths(size):
+    if size == 'small':
+        custom_style = small_style_bar()
+        custom_style.title_font_size = 26
+        date_skip = 5
+    else:
+        custom_style = large_style_bar()
+        date_skip = 3
+
     # make a df with the total cases, deaths for each day
     df_state_tot = create_maine_daily_totals_df()
 
@@ -357,13 +367,25 @@ def plot_new_deaths():
 
     return bar_chart.render_response()
 
-@app.route('/cases_by_county.svg')
-def plot_current_cases_by_county():
+
+@app.route('/cases_by_county.svg/', defaults={'size':'large'})
+@app.route('/cases_by_county.svg/<size>')
+def plot_current_cases_by_county(size):
+    if size == 'small':
+        custom_style = small_style_bar()
+        custom_style.title_font_size = 26
+        custom_style.label_font_size = 18
+        x_rot = 40
+    else:
+        custom_style = large_style_bar()
+        x_rot=20
+
     # make a df for the most recent day's data
     df_maine_today = create_maine_most_recent_df()
 
     # plot the data
-    bar_chart = pygal.Bar(x_label_rotation=20,
+    bar_chart = pygal.Bar(style=custom_style,
+                          x_label_rotation=x_rot,
                           show_legend=False,
                           y_title='Number of Cases',
                           x_title='County')
