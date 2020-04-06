@@ -303,12 +303,16 @@ def plot_case_status(size):
         date_rot = 30
         leg_pos = True
         space_sz = 30
+        the_height=900
+        the_width=700
     else:
         custom_style = large_style_bar()
         date_rot = 20
         date_skip = 3
         leg_pos = False
         space_sz = 18
+        the_height=600
+        the_width=850
 
     # create a df with total cases and deaths in Maine for each day
     df_state_tot = create_maine_daily_totals_df()
@@ -323,7 +327,9 @@ def plot_case_status(size):
                                  show_minor_x_labels=False,
                                  legend_at_bottom=leg_pos,
                                  spacing=space_sz,
-                                 legend_at_bottom_columns=2
+                                 legend_at_bottom_columns=1,
+                                 height=the_height,
+                                 width=the_width,
                                  )
     bar_chart.title = 'Maine COVID-19 Cases by Status'
     bar_chart.x_labels = df_state_tot.index.values.tolist()
@@ -413,10 +419,11 @@ def plot_new_deaths(size):
     df_state_tot['new_deaths'] = df_state_tot.deaths.diff()
     df_state_tot['new_deaths'][0] = 0
 
-    bar_chart = pygal.Bar(x_label_rotation=20,
-                      show_minor_x_labels=False,
-                      show_legend=False,
-                      y_title = 'Number of New Deaths')
+    bar_chart = pygal.Bar(style=custom_style,
+                          x_label_rotation=20,
+                          show_minor_x_labels=False,
+                          show_legend=False,
+                          y_title = 'Number of New Deaths')
     bar_chart.title = 'New COVID-19 Deaths in Maine per Day'
     dates = df_state_tot.index.values.tolist()
     bar_chart.x_labels = dates
@@ -424,6 +431,7 @@ def plot_new_deaths(size):
     bar_chart.add('Number of New Deaths', df_state_tot.new_deaths.to_list())
 
     return bar_chart.render_response()
+
 
 @app.route('/cases_by_county.svg')
 @sizes
