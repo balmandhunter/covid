@@ -96,7 +96,7 @@ def plot_county_lines(df_maine, line_chart):
 
 
 def append_recovered_data(df):
-    recovered = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,16,24,36,41,41,68,80,94,113,140]
+    recovered = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,16,24,36,41,41,68,80,94,113,140,156]
     while len(recovered) < len(df):
         recovered.append(np.nan)
     df['recovered'] = recovered
@@ -104,11 +104,11 @@ def append_recovered_data(df):
 
 
 def get_hospitalized(df):
-    hospitalized=[None,None,None,None,None,None,None,None,None,None,49,57,63,68,75,83]
+    hospitalized=[None,None,None,None,None,None,None,None,None,None,49,57,63,68,75,83, 86]
     hosp_dates = ['2020-03-20', '2020-03-21','2020-03-22','2020-03-23','2020-03-24',
                   '2020-03-25','2020-03-26','2020-03-27','2020-03-28','2020-03-29',
                   '2020-03-30','2020-03-31','2020-04-01','2020-04-02','2020-04-03',
-                  '2020-04-04']
+                  '2020-04-04', '2020-04-05']
 
     return hospitalized, hosp_dates
 
@@ -429,6 +429,41 @@ def plot_new_deaths(size):
     bar_chart.x_labels = dates
     bar_chart.x_labels_major = dates[0::date_skip]
     bar_chart.add('Number of New Deaths', df_state_tot.new_deaths.to_list())
+
+    return bar_chart.render_response()
+
+
+@app.route('/cases_by_county_breakdown.svg')
+@sizes
+def plot_current_cases_by_county_breakdown(size):
+    df_current_county = pd.read_csv('data/countydata_journal.csv', index_col=None)
+    df_current_county = df_current_county[df_current_county.end.isna() == True]
+    df_current_county.sort_values(by=['confirmed'], ascending=False, inplace=True)
+
+    if size == 'small':
+        custom_style = small_style_bar()
+        custom_style.title_font_size = 26
+        custom_style.label_font_size = 20
+        x_rot = 40
+    else:
+        custom_style = large_style_bar()
+        x_rot=30
+        custom_style.legend_font_size = 12
+
+    # calculate current cases
+    df_current_county['active_cases'] = df_current_county.confirmed - \
+                                        df_current_county.deaths - df_current_county.recovered
+
+    # plot the data
+    bar_chart = pygal.StackedBar(style=custom_style,
+                                 x_label_rotation=x_rot,
+                                 y_title='Number of Cases',
+                                 x_title='County')
+    bar_chart.title = 'COVID-19 Cases by County'
+    bar_chart.x_labels = df_current_county.county.to_list()
+    bar_chart.add('Active Cases', df_current_county.active_cases.values.tolist())
+    bar_chart.add('Deaths', df_current_county.deaths.values.tolist())
+    bar_chart.add('Recovered Cases', df_current_county.recovered.values.tolist())
 
     return bar_chart.render_response()
 
