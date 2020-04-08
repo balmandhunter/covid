@@ -183,9 +183,11 @@ def create_hospital_assets_dict():
                                                    None, None, 130]
                         }
     # Calculate the number of occupied ICU Beds
-    hosp_assets_dict = find_occupied_assets(hosp_assets_dict, 'total_icu_beds', 'available_icu_beds',
+    hosp_assets_dict = find_occupied_assets(hosp_assets_dict, 'total_icu_beds',
+                                            'available_icu_beds',
                                             return_col_name='occupied_icu_beds')
-    hosp_assets_dict = find_occupied_assets(hosp_assets_dict, 'total_ventilators', 'available_ventilators',
+    hosp_assets_dict = find_occupied_assets(hosp_assets_dict, 'total_ventilators',
+                                            'available_ventilators',
                                             return_col_name='occupied_ventilators')
     hosp_assets_dict = find_total_vent_including_alt(hosp_assets_dict)
 
