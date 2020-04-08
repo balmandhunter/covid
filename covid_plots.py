@@ -466,7 +466,7 @@ def plot_current_cases_by_county_breakdown(size):
                                  x_label_rotation=x_rot,
                                  y_title='Number of Cases',
                                  x_title='County')
-    bar_chart.title = 'COVID-19 Cases by County'
+    bar_chart.title = 'COVID-19 Cases by County (April 7, 2020)'
     bar_chart.x_labels = df_current_county.county.to_list()
     bar_chart.add('Active Cases', df_current_county.active_cases.values.tolist())
     bar_chart.add('Deaths', df_current_county.deaths.values.tolist())
