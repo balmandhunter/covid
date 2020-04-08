@@ -282,7 +282,7 @@ def plot_age_range(size):
     #create a df
     df_age = pd.DataFrame.from_dict({'age_range':['< 20','20s', '30s', '40s',
                                                   '50s', '60s', '70s','80+'],
-                                 'cases': [12,43,45,87,100,105,66,41]})
+                                 'cases': [14,47,50,87,105,106,68,42]})
     # add up the total cases and find % of total in each age range
     total_count = df_age.cases.sum()
     df_age['percent_of_tot'] = df_age.cases/total_count*100
