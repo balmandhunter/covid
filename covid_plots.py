@@ -295,7 +295,7 @@ def plot_age_range(size):
                           y_title='Percent of Cases (%)',
                           x_title='Age Group')
     # title_text = 'Case Distribution by Patient Age' + ' (' + str(df_maine_today.date.max()) + ')'
-    bar_chart.title = 'Case Distribution by Patient Age (April 6, 2020)'
+    bar_chart.title = 'Case Distribution by Patient Age (April 7, 2020)'
     bar_chart.x_labels = df_age.age_range
     bar_chart.add('% of Cases', df_age.percent_of_tot.to_list())
 
@@ -440,9 +440,9 @@ def plot_new_deaths(size):
     return bar_chart.render_response()
 
 
-@app.route('/cases_by_county_breakdown.svg')
+@app.route('/cases_by_county.svg')
 @sizes
-def plot_current_cases_by_county_breakdown(size):
+def plot_current_cases_by_county(size):
     df_current_county = pd.read_csv('data/countydata_journal.csv', index_col=None)
     df_current_county = df_current_county[df_current_county.end.isna() == True]
     df_current_county.sort_values(by=['confirmed'], ascending=False, inplace=True)
@@ -471,35 +471,6 @@ def plot_current_cases_by_county_breakdown(size):
     bar_chart.add('Active Cases', df_current_county.active_cases.values.tolist())
     bar_chart.add('Deaths', df_current_county.deaths.values.tolist())
     bar_chart.add('Recovered Cases', df_current_county.recovered.values.tolist())
-
-    return bar_chart.render_response()
-
-
-@app.route('/cases_by_county.svg')
-@sizes
-def plot_current_cases_by_county(size):
-    if size == 'small':
-        custom_style = small_style_bar()
-        custom_style.title_font_size = 26
-        custom_style.label_font_size = 20
-        x_rot = 40
-    else:
-        custom_style = large_style_bar()
-        x_rot=20
-
-    # make a df for the most recent day's data
-    df_maine_today = create_maine_most_recent_df()
-
-    # plot the data
-    bar_chart = pygal.Bar(style=custom_style,
-                          x_label_rotation=x_rot,
-                          show_legend=False,
-                          y_title='Number of Cases',
-                          x_title='County')
-    title_text = 'COVID-19 Cases by County' + ' (' + str(df_maine_today.date.max()) + ')'
-    bar_chart.title = title_text
-    bar_chart.x_labels = df_maine_today.county.to_list()
-    bar_chart.add('Cases', df_maine_today.cases.to_list())
 
     return bar_chart.render_response()
 
