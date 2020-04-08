@@ -520,10 +520,13 @@ def plot_cases_vs_pop_density(size):
     if size == 'small':
         custom_style = small_style_bar()
         custom_style.title_font_size = 24
-        custom_style.colors=['#3F51B5']
-    else:
+        custom_style.colors=['#3F51B5', '#3F51B5', '#3F51B5', '#3F51B5', '#3F51B5', '#3F51B5',
+                            '#3F51B5', '#3F51B5', '#3F51B5', '#3F51B5', '#3F51B5', '#3F51B5',
+                            '#3F51B5', '#3F51B5', '#3F51B5', '#3F51B5', '#3F51B5']    else:
         custom_style = large_style_bar()
-        custom_style.colors=['#3F51B5']
+        custom_style.colors=['#3F51B5', '#3F51B5', '#3F51B5', '#3F51B5', '#3F51B5', '#3F51B5',
+                            '#3F51B5', '#3F51B5', '#3F51B5', '#3F51B5', '#3F51B5', '#3F51B5',
+                            '#3F51B5', '#3F51B5', '#3F51B5', '#3F51B5', '#3F51B5']
         date_skip = 3
 
     # make a df of the population of Maine counties based on US Census Data
