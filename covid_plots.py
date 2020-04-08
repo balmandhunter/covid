@@ -90,7 +90,7 @@ def plot_county_lines(df_maine, line_chart):
 
 
 def append_recovered_data(df):
-    recovered = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,16,24,36,41,41,68,80,94,113,140,156,158]
+    recovered = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,16,24,36,41,41,68,80,94,113,140,156,158,176]
     while len(recovered) < len(df):
         recovered.append(np.nan)
     df['recovered'] = recovered
@@ -98,11 +98,11 @@ def append_recovered_data(df):
 
 
 def get_hospitalized(df):
-    hospitalized=[None,None,None,None,None,None,None,None,None,None,49,57,63,68,75,83,86,92]
+    hospitalized=[None,None,None,None,None,None,None,None,None,None,49,57,63,68,75,83,86,92,99]
     hosp_dates = ['2020-03-20', '2020-03-21','2020-03-22','2020-03-23','2020-03-24',
                   '2020-03-25','2020-03-26','2020-03-27','2020-03-28','2020-03-29',
                   '2020-03-30','2020-03-31','2020-04-01','2020-04-02','2020-04-03',
-                  '2020-04-04', '2020-04-05','2020-04-06']
+                  '2020-04-04', '2020-04-05','2020-04-06','2020-04-07']
 
     return hospitalized, hosp_dates
 
@@ -462,7 +462,7 @@ def plot_current_cases_by_county(size):
                                  x_label_rotation=x_rot,
                                  y_title='Number of Cases',
                                  x_title='County')
-    bar_chart.title = 'COVID-19 Cases by County (April 7, 2020)'
+    bar_chart.title = 'COVID-19 Cases by County (April 8, 2020)'
     bar_chart.x_labels = df_current_county.county.to_list()
     bar_chart.add('Active Cases', df_current_county.active_cases.values.tolist())
     bar_chart.add('Deaths', df_current_county.deaths.values.tolist())
