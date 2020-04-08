@@ -514,6 +514,54 @@ def plot_cases_per_ten_thousand_res(size):
     return bar_chart.render_response()
 
 
+@app.route('/cases_vs_pop_density.svg')
+@sizes
+def plot_cases_vs_pop_density(size):
+    if size == 'small':
+        custom_style = small_style_bar()
+        custom_style.title_font_size = 24
+        custom_style.colors=['#3F51B5']
+    else:
+        custom_style = large_style_bar()
+        custom_style.colors=['#3F51B5']
+        date_skip = 3
+
+    # make a df of the population of Maine counties based on US Census Data
+    df_population = create_population_df()
+    # make a df for the most recent day's NY Times data for Maine
+    df_maine_today = create_maine_most_recent_df()
+    # add the population data to the NY Times Data
+    df_maine_today = df_maine_today.merge(df_population, on='county')
+    # calculate cases per 100,000 residents
+    df_maine_today['cases_per_ten_thousand'] = df_maine_today.cases/ \
+                                                    (df_maine_today.population/10000)
+    df_maine_today = df_maine_today.round({'cases_per_ten_thousand':1})
+    # Calculate the population density of each county
+    df_maine_today['pop_density'] = df_maine_today.population/df_maine_today.county_area_sq_mile
+    df_maine_today = df_maine_today.round({'pop_density':0})
+    # Drop the Unknown county row
+    unknown_idx = df_maine_today[df_maine_today.county=='Unknown'].index
+    df_maine_today = df_maine_today.drop(labels=unknown_idx, axis=0)
+
+    # plot the data
+    xy_chart = pygal.XY(style=custom_style,
+                        show_legend=False,
+                        y_title='Cases per 10,000 People',
+                        x_title='Population Density (pop./sq. mile)',
+                        stroke=False,
+                        dots_size=3
+                        )
+    title_text = 'Case Load vs Population Density by County' + ' (' + \
+                  str(df_maine_today.date.max()) + ')'
+    xy_chart.title = title_text
+    # plot the data for each county
+    for index, row in df_maine_today.iterrows():
+        pop_data = [(row['pop_density'], row['cases_per_ten_thousand'])]
+        xy_chart.add(row.county, pop_data)
+
+    return xy_chart.render_response()
+
+
 @app.route('/growth_by_county.svg')
 @sizes
 def plot_growth_by_county(size):
