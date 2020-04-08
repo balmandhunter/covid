@@ -53,24 +53,18 @@ def create_maine_most_recent_df():
 def create_population_df():
     # make a dataframe of county population data
     # (source: https://data.census.gov/cedsci/profile?g=0500000US23005&q=Cumberland)
-    population_data = {'Cumberland': 290944,
-                       'York':203102,
-                       'Oxford':57325,
-                       'Sagadahoc':35277,
-                       'Androscoggin':107444,
-                       'Lincoln':34067,
-                       'Kennebec':121545,
-                       'Franklin':30019,
-                       'Knox':39823,
-                       'Waldo':39418,
-                       'Somerset':50710,
-                       'Hancock':54541,
-                       'Washington':31694,
-                       'Piscataquis':16877,
-                       'Penobscot':151748,
-                       'Aroostook': 68269,
-                       'Unknown':np.nan}
-    df_population = pd.DataFrame.from_dict(population_data, orient='index',columns=['population'])
+    population_data = {'county':['Cumberland', 'York', 'Oxford', 'Sagadahoc', 'Androscoggin',
+                                 'Lincoln', 'Kennebec', 'Franklin', 'Knox', 'Waldo', 'Somerset',
+                                 'Hancock', 'Washington', 'Piscataquis', 'Penobscot', 'Aroostook',
+                                 'Unknown'],
+                       'population':[290944, 203102,  57325,  35277, 107444,  34067, 121545,
+                                     30019,  39823,  39418,  50710,  54541,  31694,  16877,
+                                     151748,  68269, np.nan],
+                       'county_area_sq_mile':[835.5, 990.5, 2076.3, 253.9, 467.8,
+                                    455.7, 867.3, 1696.5, 365, 729.7, 3923.3,
+                                    1586.6, 2562, 3959.9, 3396.3, 6669.3,
+                                    np.nan]}
+    df_population = pd.DataFrame.from_dict(population_data)
     return df_population
 
 
@@ -493,7 +487,7 @@ def plot_cases_per_ten_thousand_res(size):
     # make a df for the most recent day's NY Times data for Maine
     df_maine_today = create_maine_most_recent_df()
     # add the population data to the NY Times Data
-    df_maine_today = df_maine_today.merge(df_population, left_on='county', right_index=True)
+    df_maine_today = df_maine_today.merge(df_population, on='county')
     # calculate cases per 100,000 residents
     df_maine_today['cases_per_ten_thousand'] = df_maine_today.cases/ \
                                                     (df_maine_today.population/10000)
@@ -507,7 +501,8 @@ def plot_cases_per_ten_thousand_res(size):
                           x_label_rotation=x_rot,
                           show_legend=False,
                           y_title='Cases per 10,000 People',
-                          x_title='County')
+                          x_title='County',
+                          truncate_legend=-1                          )
     title_text = 'COVID-19 Cases per 10,000 Residents' + ' (' + \
                   str(df_maine_today.date.max()) + ')'
     bar_chart.title = title_text
