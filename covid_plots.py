@@ -522,7 +522,8 @@ def plot_cases_vs_pop_density(size):
         custom_style.title_font_size = 24
         custom_style.colors=['#3F51B5', '#3F51B5', '#3F51B5', '#3F51B5', '#3F51B5', '#3F51B5',
                             '#3F51B5', '#3F51B5', '#3F51B5', '#3F51B5', '#3F51B5', '#3F51B5',
-                            '#3F51B5', '#3F51B5', '#3F51B5', '#3F51B5', '#3F51B5']    else:
+                            '#3F51B5', '#3F51B5', '#3F51B5', '#3F51B5', '#3F51B5']
+    else:
         custom_style = large_style_bar()
         custom_style.colors=['#3F51B5', '#3F51B5', '#3F51B5', '#3F51B5', '#3F51B5', '#3F51B5',
                             '#3F51B5', '#3F51B5', '#3F51B5', '#3F51B5', '#3F51B5', '#3F51B5',
