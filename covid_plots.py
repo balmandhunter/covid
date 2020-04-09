@@ -11,7 +11,7 @@ from middleware import sizes
 
 app = Flask(__name__)
 
-def import_nytimes_data():
+def get_nytimes_data():
     ''' Import data from the NY Times GitHub repo'''
 
     if (not os.environ.get('PYTHONHTTPSVERIFY', '') and
@@ -22,28 +22,21 @@ def import_nytimes_data():
     return df
 
 
-def create_maine_df():
+def filter_maine_df(df):
     ''' Make a df for just the Maine data from the NY Times'''
-
-    df = import_nytimes_data()
-    # make a df for the NY Times Maine data
     df_maine = df[df.state == 'Maine']
     return df_maine
 
 
-def create_maine_daily_totals_df():
+def combine_counties(df_maine):
     ''' Create a df with total cases and deaths in Maine for each day '''
-
-    df_maine = create_maine_df()
     # find the total cases, deaths for each day
     df_state_tot = df_maine.groupby('date').sum()
     return df_state_tot
 
 
-def create_maine_most_recent_df():
+def filter_most_recent_date(df_maine):
     ''' make a df for the Maine data from the NY Times'''
-    df_maine = create_maine_df()
-    # make a df for the most recent day's data
     df_maine_today = df_maine[df_maine.date == df_maine.date.max()]
     # sort the df by case count
     df_maine_today.sort_values(by=['cases'], ascending=False, inplace=True)
@@ -318,7 +311,9 @@ def plot_case_status(size):
         the_width=850
 
     # create a df with total cases and deaths in Maine for each day
-    df_state_tot = create_maine_daily_totals_df()
+    df_state_tot = (get_nytimes_data()
+        .pipe(filter_maine_df)
+        .pipe(combine_counties))
 
     # add a recovered column from the Press Herald data
     df_state_tot = append_recovered_data(df_state_tot)
@@ -357,7 +352,9 @@ def plot_new_cases(size):
         date_skip = 3
 
     # make a df with the total cases, deaths for each day
-    df_state_tot = create_maine_daily_totals_df()
+    df_state_tot = (get_nytimes_data()
+      .pipe(filter_maine_df)
+      .pipe(combine_counties))
 
     # calculate new cases per day
     df_state_tot['new_cases'] = df_state_tot.cases.diff()
@@ -376,6 +373,7 @@ def plot_new_cases(size):
 
     return bar_chart.render_response()
 
+
 @app.route('/total_deaths.svg')
 @sizes
 def plot_deaths(size):
@@ -388,7 +386,9 @@ def plot_deaths(size):
         date_skip = 3
 
     # make a df with the total cases, deaths for each day
-    df_state_tot = create_maine_daily_totals_df()
+    df_state_tot = (get_nytimes_data()
+      .pipe(filter_maine_df)
+      .pipe(combine_counties))
 
     # plot death data
     bar_chart = pygal.Bar(style=custom_style,
@@ -405,6 +405,7 @@ def plot_deaths(size):
 
     return bar_chart.render_response()
 
+
 @app.route('/new_deaths.svg')
 @sizes
 def plot_new_deaths(size):
@@ -417,7 +418,9 @@ def plot_new_deaths(size):
         date_skip = 3
 
     # make a df with the total cases, deaths for each day
-    df_state_tot = create_maine_daily_totals_df()
+    df_state_tot = (get_nytimes_data()
+      .pipe(filter_maine_df)
+      .pipe(combine_counties))
 
     df_state_tot['new_deaths'] = df_state_tot.deaths.diff()
     df_state_tot['new_deaths'][0] = 0
@@ -487,7 +490,9 @@ def plot_cases_per_ten_thousand_res(size):
     # make a df of the population of Maine counties based on US Census Data
     df_population = create_population_df()
     # make a df for the most recent day's NY Times data for Maine
-    df_maine_today = create_maine_most_recent_df()
+    df_maine_today = (get_nytimes_data()
+        .pipe(filter_maine_df)
+        .pipe(filter_most_recent_date))
     # add the population data to the NY Times Data
     df_maine_today = df_maine_today.merge(df_population, on='county')
     # calculate cases per 100,000 residents
@@ -533,7 +538,9 @@ def plot_cases_vs_pop_density(size):
     # make a df of the population of Maine counties based on US Census Data
     df_population = create_population_df()
     # make a df for the most recent day's NY Times data for Maine
-    df_maine_today = create_maine_most_recent_df()
+    df_maine_today = (get_nytimes_data()
+        .pipe(filter_maine_df)
+        .pipe(filter_most_recent_date))
     # add the population data to the NY Times Data
     df_maine_today = df_maine_today.merge(df_population, on='county')
     # calculate cases per 100,000 residents
@@ -569,7 +576,8 @@ def plot_cases_vs_pop_density(size):
 @app.route('/growth_by_county.svg')
 @sizes
 def plot_growth_by_county(size):
-    df_maine = create_maine_df()
+    df_maine = (get_nytimes_data()
+      .pipe(filter_maine_df))
     config = line_config(size)
     dates = list(df_maine.date.unique())
     if size == 'small':
@@ -604,7 +612,8 @@ def plot_growth_by_county(size):
 @app.route('/growth_by_county_log.svg')
 @sizes
 def plot_growth_by_county_log(size):
-    df_maine = create_maine_df()
+    df_maine = (get_nytimes_data()
+      .pipe(filter_maine_df))
     config = line_config(size)
     dates = list(df_maine.date.unique())
     if size == 'small':
@@ -621,7 +630,8 @@ def plot_growth_by_county_log(size):
         space_sz = 14
 
     # Import the data
-    df_maine = create_maine_df()
+    df_maine = (get_nytimes_data()
+        .pipe(filter_maine_df))
     # Setup Configuration
     config = line_config(size)
     # Plot the data
@@ -670,7 +680,9 @@ def plot_hospitalization(size):
         custom_style.legend_font_size = 18
 
     # make a df with the total cases, deaths for each day
-    df_state_tot = create_maine_daily_totals_df()
+    df_state_tot = (get_nytimes_data()
+      .pipe(filter_maine_df)
+      .pipe(combine_counties))
     hospitalized, hosp_dates = get_hospitalized(df_state_tot)
 
 
