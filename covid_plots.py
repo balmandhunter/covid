@@ -152,31 +152,38 @@ def create_hospital_assets_dict():
     hosp_assets_dict = {'date':['2020-03-20','2020-03-21', '2020-03-22', '2020-03-23','2020-03-24',
                             '2020-03-25','2020-03-26','2020-03-27','2020-03-28','2020-03-29',
                             '2020-03-30','2020-03-31', '2020-04-01','2020-04-02','2020-04-03',
-                            '2020-04-04', '2020-04-05', '2020-04-06', '2020-04-07', '2020-04-08'],
+                            '2020-04-04', '2020-04-05', '2020-04-06', '2020-04-07', '2020-04-08',
+                            '2020-04-09'],
                          'total_icu_beds':[135, None, None, None, None,
                                            151, 151, 164, None, None,
                                            176, 190, 272, 285, 289,
-                                           None, None, 300, None, 305],
+                                           None, None, 300, None, 305,
+                                           308],
                          'available_icu_beds': [56, None, None, None, 77,
                                                 83, 86, 86, None, None,
                                                 92, 90, 124, 122, 110,
-                                                None, None, 120, None, 154],
+                                                None, None, 120, None, 154,
+                                                149],
                          'total_ventilators':[291, None, None, None, None,
                                               306, 307, 308, None, None,
                                               309, 330, 348, 334, 324,
-                                              None, None, 324, None, 331],
+                                              None, None, 324, None, 331,
+                                              333],
                          'available_ventilators':[218, None, None, None, 248,
                                                   248, 250, 247, None, None,
                                                   253, 262, 271, 266, 267,
-                                                  None, None, 268, None, 282],
+                                                  None, None, 268, None, 282,
+                                                  283],
                          'alternative_ventilators':[None, None, None, None, None,
                                                     None, None, 58, None, None,
                                                     87, 89, 128, 186, 199,
-                                                    None, None, 199, None, 233],
+                                                    None, None, 199, None, 233,
+                                                    232],
                          'respiratory_therapists':[None, None, None, None, 84,
                                                    88, None, None, None, None,
                                                    None, None, None, None, 127,
-                                                   None, None, 130, None, None]
+                                                   None, None, 130, None, None,
+                                                   None]
                         }
     # Calculate the number of occupied ICU Beds
     hosp_assets_dict = find_occupied_assets(hosp_assets_dict, 'total_icu_beds',
@@ -481,7 +488,7 @@ def plot_current_cases_by_county(size):
                                  height=the_height,
                                  width=the_width,
                                  spacing=space_sz)
-    bar_chart.title = 'COVID-19 Cases by County (April 8, 2020)'
+    bar_chart.title = 'COVID-19 Cases by County (April 9, 2020)'
     bar_chart.x_labels = df_current_county.county.to_list()
     bar_chart.add('Active Cases', df_current_county.active_cases.values.tolist())
     bar_chart.add('Deaths', df_current_county.deaths.values.tolist())
