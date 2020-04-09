@@ -83,7 +83,9 @@ def plot_county_lines(df_maine, line_chart):
 
 
 def append_recovered_data(df):
-    recovered = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,16,24,36,41,41,68,80,94,113,140,156,158,176]
+    recovered = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,16,
+                 24,36,41,41,68,80,94,113,140,156,
+                 158,176,187]
     while len(recovered) < len(df):
         recovered.append(np.nan)
     df['recovered'] = recovered
@@ -91,11 +93,12 @@ def append_recovered_data(df):
 
 
 def get_hospitalized(df):
-    hospitalized=[None,None,None,None,None,None,None,None,None,None,49,57,63,68,75,83,86,92,99]
+    hospitalized=[None,None,None,None,None,None,None,None,None,
+                  None,49,57,63,68,75,83,86,92,99,101]
     hosp_dates = ['2020-03-20', '2020-03-21','2020-03-22','2020-03-23','2020-03-24',
                   '2020-03-25','2020-03-26','2020-03-27','2020-03-28','2020-03-29',
                   '2020-03-30','2020-03-31','2020-04-01','2020-04-02','2020-04-03',
-                  '2020-04-04', '2020-04-05','2020-04-06','2020-04-07']
+                  '2020-04-04', '2020-04-05','2020-04-06','2020-04-07', '2020-04-08']
 
     return hospitalized, hosp_dates
 
@@ -271,7 +274,7 @@ def plot_age_range(size):
     #create a df
     df_age = pd.DataFrame.from_dict({'age_range':['< 20','20s', '30s', '40s',
                                                   '50s', '60s', '70s','80+'],
-                                 'cases': [14,50,54,88,109,107,70,45]})
+                                 'cases': [14,50,60,90,114,109,73,50]})
     # add up the total cases and find % of total in each age range
     total_count = df_age.cases.sum()
     df_age['percent_of_tot'] = df_age.cases/total_count*100
@@ -284,7 +287,7 @@ def plot_age_range(size):
                           y_title='Percent of Cases (%)',
                           x_title='Age Group')
     # title_text = 'Case Distribution by Patient Age' + ' (' + str(df_maine_today.date.max()) + ')'
-    bar_chart.title = 'Case Distribution by Patient Age (April 8, 2020)'
+    bar_chart.title = 'Case Distribution by Patient Age (April 9, 2020)'
     bar_chart.x_labels = df_age.age_range
     bar_chart.add('% of Cases', df_age.percent_of_tot.to_list())
 
