@@ -203,7 +203,7 @@ def get_custom_style(size):
         custom_style = Style(
             colors=['#85144B', '#111111', '#7FDBFF', '#39CCCC', '#3D9970', '#2ECC40', '#01FF70',
                     '#FFDC00', '#FF851B', '#FF4136', '#F012BE', '#B10DC9', '#00008b', '#0074D9',
-                    '#85144B', '#7FDBFF', '#afafaf', '#9e9e9e', '#6e6e6e'],
+                    '#85144B', '#7FDBFF', '#C0C0C0', '#A9A9A9', '#696969'],
             label_font_size=18,
             major_guide_stroke_dasharray= '1.5,1.5',
             title_font_size=24,
@@ -215,7 +215,7 @@ def get_custom_style(size):
         custom_style = Style(
             colors=['#85144B', '#111111', '#7FDBFF', '#39CCCC', '#3D9970', '#2ECC40', '#01FF70',
                     '#FFDC00', '#FF851B', '#FF4136', '#F012BE', '#B10DC9', '#00008b', '#0074D9',
-                    '#85144B', '#7FDBFF', '#afafaf', '#9e9e9e', '#6e6e6e'],
+                    '#85144B', '#7FDBFF', '#C0C0C0', '#A9A9A9', '#696969'],
             label_font_size=12,
             major_guide_stroke_dasharray= '1.5,1.5',
             title_font_size=18,
