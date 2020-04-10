@@ -79,7 +79,7 @@ def plot_county_lines(df_maine, line_chart):
                         len(df_maine[df_maine.county==county].cases)
             case_data = df_maine[df_maine.county==county].cases.to_list()
             case_data = [0]*len_diff + case_data
-        line_chart.add(county, case_data, dots_size=1.5)
+        line_chart.add(county, case_data, stroke_style={'width':1.75})
 
 
 def append_recovered_data(df):
@@ -203,23 +203,25 @@ def get_custom_style(size):
         custom_style = Style(
             colors=['#85144B', '#111111', '#7FDBFF', '#39CCCC', '#3D9970', '#2ECC40', '#01FF70',
                     '#FFDC00', '#FF851B', '#FF4136', '#F012BE', '#B10DC9', '#00008b', '#0074D9',
-                    '#85144B', '#7FDBFF', '#6e6e6e', '#9e9e9e', '#dbdbdb'],
+                    '#85144B', '#7FDBFF', '#afafaf', '#9e9e9e', '#6e6e6e'],
             label_font_size=18,
             major_guide_stroke_dasharray= '1.5,1.5',
             title_font_size=24,
             major_label_font_size=20,
-            legend_font_size=18
+            legend_font_size=18,
+            stroke_opacity=0.6
         )
     else:
         custom_style = Style(
             colors=['#85144B', '#111111', '#7FDBFF', '#39CCCC', '#3D9970', '#2ECC40', '#01FF70',
                     '#FFDC00', '#FF851B', '#FF4136', '#F012BE', '#B10DC9', '#00008b', '#0074D9',
-                    '#85144B', '#7FDBFF', '#6e6e6e', '#9e9e9e', '#dbdbdb'],
+                    '#85144B', '#7FDBFF', '#afafaf', '#9e9e9e', '#6e6e6e'],
             label_font_size=12,
             major_guide_stroke_dasharray= '1.5,1.5',
             title_font_size=18,
             major_label_font_size=14,
-            legend_font_size=13
+            legend_font_size=13,
+            stroke_opacity=0.6
         )
     return custom_style
 
@@ -631,7 +633,8 @@ def plot_growth_by_county(size):
                             legend_at_bottom=leg_pos,
                             spacing=space_sz,
                             x_label_rotation=30,
-                            legend_at_bottom_columns=2)
+                            legend_at_bottom_columns=2,
+                            show_dots=False)
     line_chart.title = 'COVID-19 Case Growth by County'
     line_chart.x_labels = list(df_maine.date.unique())
     line_chart.x_labels_major = list(df_maine.date.unique())[0::date_skip]
@@ -675,7 +678,8 @@ def plot_growth_by_county_log(size):
                             width=the_width,
                             legend_at_bottom=leg_pos,
                             spacing=space_sz,
-                            legend_at_bottom_columns=1
+                            legend_at_bottom_columns=1,
+                            show_dots=False
                             )
     line_chart.title = 'COVID-19 Case Growth by County (log scale)'
     line_chart.x_labels = list(df_maine.date.unique())
@@ -683,13 +687,13 @@ def plot_growth_by_county_log(size):
     #add a line for each county
     plot_county_lines(df_maine, line_chart)
     # Set the stoke style for the reference lines and plot them
-    ref_style = stroke_style={'width':2.5}
+    ref_style = stroke_style={'width':3}
     line_chart.add('Cases Double every 3 Days', create_days_to_double_data(df_maine, 3),
-                  stroke_style=ref_style, dots_size=1)
+                  stroke_style=ref_style)
     line_chart.add('Cases Double every 5 Days', create_days_to_double_data(df_maine, 5),
-                   stroke_style=ref_style, dots_size=1)
+                   stroke_style=ref_style)
     line_chart.add('Cases Double every Week', create_days_to_double_data(df_maine, 7),
-                   stroke_style=ref_style, dots_size=1)
+                   stroke_style=ref_style)
 
     return line_chart.render_response()
 
