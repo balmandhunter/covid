@@ -72,18 +72,6 @@ def plot_county_lines(df_maine, line_chart):
             case_data = [0]*len_diff + case_data
         line_chart.add(county, case_data, stroke_style={'width':1.75})
 
-#
-# def get_hospitalized(df):
-#     hospitalized=[None,None,None,None,None,None,None,None,None,
-#                   None,49,57,63,68,75,83,86,92,99,101,105]
-#     hosp_dates = ['2020-03-20', '2020-03-21','2020-03-22','2020-03-23','2020-03-24',
-#                   '2020-03-25','2020-03-26','2020-03-27','2020-03-28','2020-03-29',
-#                   '2020-03-30','2020-03-31','2020-04-01','2020-04-02','2020-04-03',
-#                   '2020-04-04', '2020-04-05','2020-04-06','2020-04-07', '2020-04-08',
-#                   '2020-04-09']
-#
-#     return hospitalized, hosp_dates
-
 
 def find_occupied_assets(the_dict, total_asset, available_asset, return_col_name='occupied'):
     occupied_asset = []
@@ -265,7 +253,7 @@ def plot_age_range(size):
     #create a df
     df_age = pd.DataFrame.from_dict({'age_range':['< 20','20s', '30s', '40s',
                                                   '50s', '60s', '70s','80+'],
-                                 'cases': [14,53,62,92,119,112,81,53]})
+                                 'cases': [15,53,64,96,127,113,88,60]})
     # add up the total cases and find % of total in each age range
     total_count = df_age.cases.sum()
     df_age['percent_of_tot'] = df_age.cases/total_count*100
@@ -277,8 +265,7 @@ def plot_age_range(size):
                           show_legend=False,
                           y_title='Percent of Cases (%)',
                           x_title='Age Group')
-    # title_text = 'Case Distribution by Patient Age' + ' (' + str(df_maine_today.date.max()) + ')'
-    bar_chart.title = 'Case Distribution by Patient Age (April 10, 2020)'
+    bar_chart.title = 'Case Distribution by Patient Age (April 11, 2020)'
     bar_chart.x_labels = df_age.age_range
     bar_chart.add('% of Cases', df_age.percent_of_tot.to_list())
 
