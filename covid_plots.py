@@ -239,6 +239,14 @@ def get_custom_style_assets(size):
         return custom_style
 
 
+def insert_press_herald_recovered(df):
+    recovered_insert = [16,24,36,41,41,68]
+    fill_dates = ['2020-03-26','2020-03-27','2020-03-28','2020-03-29','2020-03-30','2020-03-31']
+    for idx,rec in enumerate(recovered_insert):
+        df.loc[fill_dates[idx]]['recovered'] = rec
+    return df
+
+
 @app.route('/age_range.svg')
 @sizes
 def plot_age_range(size):
@@ -294,6 +302,8 @@ def plot_case_status(size):
 
     # create a df with total cases and deaths in Maine for each day
     df_state_tot = (get_maine_df().pipe(combine_counties))
+    # Add the Press Herald Data for recovered cases between 3/26 and 3/31
+    df_state_tot = insert_press_herald_recovered(df_state_tot)
 
     # find the number of active cases
     df_state_tot['active_cases'] = df_state_tot.confirmed - df_state_tot.deaths - df_state_tot.recovered
