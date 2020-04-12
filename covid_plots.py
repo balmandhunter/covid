@@ -11,20 +11,10 @@ from middleware import sizes
 
 app = Flask(__name__)
 
-def get_nytimes_data():
-    ''' Import data from the NY Times GitHub repo'''
-
-    if (not os.environ.get('PYTHONHTTPSVERIFY', '') and
-    getattr(ssl, '_create_unverified_context', None)):
-        ssl._create_default_https_context = ssl._create_unverified_context
-    url = 'https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv'
-    df = pd.read_csv(url, error_bad_lines=False)
-    return df
-
-
-def filter_maine_df(df):
-    ''' Make a df for just the Maine data from the NY Times'''
-    df_maine = df[df.state == 'Maine']
+def get_maine_df():
+    ''' Make a df for just the Maine data from the API'''
+    df_maine = pd.read_csv(
+        'http://mecovid19data.almandhunter.com/api/v0/countydata.csv?')
     return df_maine
 
 
@@ -35,11 +25,12 @@ def combine_counties(df_maine):
     return df_state_tot
 
 
-def filter_most_recent_date(df_maine):
-    ''' make a df for the Maine data from the NY Times'''
-    df_maine_today = df_maine[df_maine.date == df_maine.date.max()]
+def get_most_recent_data():
+    ''' Make a df for the most recent Maine data from the data API'''
+    df_maine_today = pd.read_csv(
+        'http://mecovid19data.almandhunter.com/api/v0/countydata.csv?latest')
     # sort the df by case count
-    df_maine_today.sort_values(by=['cases'], ascending=False, inplace=True)
+    df_maine_today.sort_values(by=['confirmed'], ascending=False, inplace=True)
     return df_maine_today
 
 
@@ -72,36 +63,26 @@ def create_days_to_double_data(df, days_to_double):
 
 def plot_county_lines(df_maine, line_chart):
     for county in df_maine.county.unique():
-        if len(list(df_maine.date.unique())) == len(df_maine[df_maine.county==county].cases):
-            case_data = df_maine[df_maine.county==county].cases
+        if len(list(df_maine.date.unique())) == len(df_maine[df_maine.county==county].confirmed):
+            case_data = df_maine[df_maine.county==county].confirmed
         else:
             len_diff = len(list(df_maine.date.unique())) - \
-                        len(df_maine[df_maine.county==county].cases)
-            case_data = df_maine[df_maine.county==county].cases.to_list()
+                        len(df_maine[df_maine.county==county].confirmed)
+            case_data = df_maine[df_maine.county==county].confirmed.to_list()
             case_data = [0]*len_diff + case_data
         line_chart.add(county, case_data, stroke_style={'width':1.75})
 
-
-def append_recovered_data(df):
-    recovered = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,16,
-                 24,36,41,41,68,80,94,113,140,156,
-                 158,176,187,202]
-    while len(recovered) < len(df):
-        recovered.append(np.nan)
-    df['recovered'] = recovered
-    return df
-
-
-def get_hospitalized(df):
-    hospitalized=[None,None,None,None,None,None,None,None,None,
-                  None,49,57,63,68,75,83,86,92,99,101,105]
-    hosp_dates = ['2020-03-20', '2020-03-21','2020-03-22','2020-03-23','2020-03-24',
-                  '2020-03-25','2020-03-26','2020-03-27','2020-03-28','2020-03-29',
-                  '2020-03-30','2020-03-31','2020-04-01','2020-04-02','2020-04-03',
-                  '2020-04-04', '2020-04-05','2020-04-06','2020-04-07', '2020-04-08',
-                  '2020-04-09']
-
-    return hospitalized, hosp_dates
+#
+# def get_hospitalized(df):
+#     hospitalized=[None,None,None,None,None,None,None,None,None,
+#                   None,49,57,63,68,75,83,86,92,99,101,105]
+#     hosp_dates = ['2020-03-20', '2020-03-21','2020-03-22','2020-03-23','2020-03-24',
+#                   '2020-03-25','2020-03-26','2020-03-27','2020-03-28','2020-03-29',
+#                   '2020-03-30','2020-03-31','2020-04-01','2020-04-02','2020-04-03',
+#                   '2020-04-04', '2020-04-05','2020-04-06','2020-04-07', '2020-04-08',
+#                   '2020-04-09']
+#
+#     return hospitalized, hosp_dates
 
 
 def find_occupied_assets(the_dict, total_asset, available_asset, return_col_name='occupied'):
@@ -154,37 +135,37 @@ def create_hospital_assets_dict():
                             '2020-03-25','2020-03-26','2020-03-27','2020-03-28','2020-03-29',
                             '2020-03-30','2020-03-31', '2020-04-01','2020-04-02','2020-04-03',
                             '2020-04-04', '2020-04-05', '2020-04-06', '2020-04-07', '2020-04-08',
-                            '2020-04-09'],
+                            '2020-04-09','2020-04-10'],
                          'total_icu_beds':[135, None, None, None, None,
                                            151, 151, 164, None, None,
                                            176, 190, 272, 285, 289,
                                            None, None, 300, None, 305,
-                                           308],
+                                           308, None],
                          'available_icu_beds': [56, None, None, None, 77,
                                                 83, 86, 86, None, None,
                                                 92, 90, 124, 122, 110,
                                                 None, None, 120, None, 154,
-                                                149],
+                                                149, None],
                          'total_ventilators':[291, None, None, None, None,
                                               306, 307, 308, None, None,
                                               309, 330, 348, 334, 324,
                                               None, None, 324, None, 331,
-                                              333],
+                                              333, None],
                          'available_ventilators':[218, None, None, None, 248,
                                                   248, 250, 247, None, None,
                                                   253, 262, 271, 266, 267,
                                                   None, None, 268, None, 282,
-                                                  283],
+                                                  283, None],
                          'alternative_ventilators':[None, None, None, None, None,
                                                     None, None, 58, None, None,
                                                     87, 89, 128, 186, 199,
                                                     None, None, 199, None, 233,
-                                                    232],
+                                                    232, None],
                          'respiratory_therapists':[None, None, None, None, 84,
                                                    88, None, None, None, None,
                                                    None, None, None, None, 127,
                                                    None, None, 130, None, None,
-                                                   None]
+                                                   None, None]
                         }
     # Calculate the number of occupied ICU Beds
     hosp_assets_dict = find_occupied_assets(hosp_assets_dict, 'total_icu_beds',
@@ -284,7 +265,7 @@ def plot_age_range(size):
     #create a df
     df_age = pd.DataFrame.from_dict({'age_range':['< 20','20s', '30s', '40s',
                                                   '50s', '60s', '70s','80+'],
-                                 'cases': [14,50,60,90,114,109,73,50]})
+                                 'cases': [14,53,62,92,119,112,81,53]})
     # add up the total cases and find % of total in each age range
     total_count = df_age.cases.sum()
     df_age['percent_of_tot'] = df_age.cases/total_count*100
@@ -297,11 +278,12 @@ def plot_age_range(size):
                           y_title='Percent of Cases (%)',
                           x_title='Age Group')
     # title_text = 'Case Distribution by Patient Age' + ' (' + str(df_maine_today.date.max()) + ')'
-    bar_chart.title = 'Case Distribution by Patient Age (April 9, 2020)'
+    bar_chart.title = 'Case Distribution by Patient Age (April 10, 2020)'
     bar_chart.x_labels = df_age.age_range
     bar_chart.add('% of Cases', df_age.percent_of_tot.to_list())
 
     return bar_chart.render_response()
+
 
 @app.route('/case_status.svg')
 @sizes
@@ -324,13 +306,10 @@ def plot_case_status(size):
         the_width=850
 
     # create a df with total cases and deaths in Maine for each day
-    df_state_tot = (get_nytimes_data()
-        .pipe(filter_maine_df)
-        .pipe(combine_counties))
+    df_state_tot = (get_maine_df().pipe(combine_counties))
 
-    # add a recovered column from the Press Herald data
-    df_state_tot = append_recovered_data(df_state_tot)
-    df_state_tot['active_cases'] = df_state_tot.cases - df_state_tot.deaths - df_state_tot.recovered
+    # find the number of active cases
+    df_state_tot['active_cases'] = df_state_tot.confirmed - df_state_tot.deaths - df_state_tot.recovered
 
     # plot the daily total cases, deaths, and recovered
     bar_chart = pygal.StackedBar(style=custom_style,
@@ -365,12 +344,11 @@ def plot_new_cases(size):
         date_skip = 6
 
     # make a df with the total cases, deaths for each day
-    df_state_tot = (get_nytimes_data()
-      .pipe(filter_maine_df)
+    df_state_tot = (get_maine_df()
       .pipe(combine_counties))
 
     # calculate new cases per day
-    df_state_tot['new_cases'] = df_state_tot.cases.diff()
+    df_state_tot['new_cases'] = df_state_tot.confirmed.diff()
     df_state_tot['new_cases'][0] = 1
 
     # plot new cases per day
@@ -399,8 +377,7 @@ def plot_deaths(size):
         date_skip = 6
 
     # make a df with the total cases, deaths for each day
-    df_state_tot = (get_nytimes_data()
-      .pipe(filter_maine_df)
+    df_state_tot = (get_maine_df()
       .pipe(combine_counties))
 
     # plot death data
@@ -431,8 +408,7 @@ def plot_new_deaths(size):
         date_skip = 6
 
     # make a df with the total cases, deaths for each day
-    df_state_tot = (get_nytimes_data()
-      .pipe(filter_maine_df)
+    df_state_tot = (get_maine_df()
       .pipe(combine_counties))
 
     df_state_tot['new_deaths'] = df_state_tot.deaths.diff()
@@ -455,8 +431,7 @@ def plot_new_deaths(size):
 @app.route('/cases_by_county.svg')
 @sizes
 def plot_current_cases_by_county(size):
-    df_current_county = pd.read_csv('data/countydata_journal.csv', index_col=None)
-    df_current_county = df_current_county[df_current_county.end.isna() == True]
+    df_current_county = get_most_recent_data()
     df_current_county.sort_values(by=['confirmed'], ascending=False, inplace=True)
 
     if size == 'small':
@@ -491,7 +466,8 @@ def plot_current_cases_by_county(size):
                                  height=the_height,
                                  width=the_width,
                                  spacing=space_sz)
-    bar_chart.title = 'COVID-19 Cases by County (April 9, 2020)'
+    bar_chart.title = 'COVID-19 Cases by County' + ' (' + \
+                  str(df_current_county.date.max()) + ')'
     bar_chart.x_labels = df_current_county.county.to_list()
     bar_chart.add('Active Cases', df_current_county.active_cases.values.tolist())
     bar_chart.add('Deaths', df_current_county.deaths.values.tolist())
@@ -519,14 +495,12 @@ def plot_cases_per_ten_thousand_res(size):
 
     # make a df of the population of Maine counties based on US Census Data
     df_population = create_population_df()
-    # make a df for the most recent day's NY Times data for Maine
-    df_maine_today = (get_nytimes_data()
-        .pipe(filter_maine_df)
-        .pipe(filter_most_recent_date))
+    # make a df for the most recent day's data for Maine
+    df_maine_today = get_most_recent_data()
     # add the population data to the NY Times Data
     df_maine_today = df_maine_today.merge(df_population, on='county')
     # calculate cases per 100,000 residents
-    df_maine_today['cases_per_ten_thousand'] = df_maine_today.cases/ \
+    df_maine_today['cases_per_ten_thousand'] = df_maine_today.confirmed/ \
                                                     (df_maine_today.population/10000)
     df_maine_today = df_maine_today.round({'cases_per_ten_thousand':1})
     # Drop the Unknown county row
@@ -571,13 +545,11 @@ def plot_cases_vs_pop_density(size):
     # make a df of the population of Maine counties based on US Census Data
     df_population = create_population_df()
     # make a df for the most recent day's NY Times data for Maine
-    df_maine_today = (get_nytimes_data()
-        .pipe(filter_maine_df)
-        .pipe(filter_most_recent_date))
+    df_maine_today = get_most_recent_data()
     # add the population data to the NY Times Data
     df_maine_today = df_maine_today.merge(df_population, on='county')
     # calculate cases per 100,000 residents
-    df_maine_today['cases_per_ten_thousand'] = df_maine_today.cases/ \
+    df_maine_today['cases_per_ten_thousand'] = df_maine_today.confirmed/ \
                                                     (df_maine_today.population/10000)
     df_maine_today = df_maine_today.round({'cases_per_ten_thousand':1})
     # Calculate the population density of each county
@@ -609,8 +581,7 @@ def plot_cases_vs_pop_density(size):
 @app.route('/growth_by_county.svg')
 @sizes
 def plot_growth_by_county(size):
-    df_maine = (get_nytimes_data()
-      .pipe(filter_maine_df))
+    df_maine = get_maine_df()
     config = line_config(size)
     dates = list(df_maine.date.unique())
     if size == 'small':
@@ -647,8 +618,7 @@ def plot_growth_by_county(size):
 @app.route('/growth_by_county_log.svg')
 @sizes
 def plot_growth_by_county_log(size):
-    df_maine = (get_nytimes_data()
-      .pipe(filter_maine_df))
+    df_maine = get_maine_df()
     config = line_config(size)
     dates = list(df_maine.date.unique())
     if size == 'small':
@@ -665,8 +635,7 @@ def plot_growth_by_county_log(size):
         space_sz = 14
 
     # Import the data
-    df_maine = (get_nytimes_data()
-        .pipe(filter_maine_df))
+    df_maine = get_maine_df()
     # Setup Configuration
     config = line_config(size)
     # Plot the data
@@ -717,11 +686,8 @@ def plot_hospitalization(size):
         custom_style.legend_font_size = 18
 
     # make a df with the total cases, deaths for each day
-    df_state_tot = (get_nytimes_data()
-      .pipe(filter_maine_df)
+    df_state_tot = (get_maine_df()
       .pipe(combine_counties))
-    hospitalized, hosp_dates = get_hospitalized(df_state_tot)
-
 
     line_chart = pygal.Line(style=custom_style,
                             include_x_axis=True,
@@ -734,9 +700,9 @@ def plot_hospitalization(size):
                             spacing=space_sz,
                             legend_at_bottom_columns=2)
     line_chart.title = 'Total Patients Ever Hospitalized for COVID-19 in Maine'
-    line_chart.x_labels = hosp_dates
-    line_chart.x_labels_major = hosp_dates[0::date_skip]
-    line_chart.add('Total Hospitalized', hospitalized,
+    line_chart.x_labels = df_state_tot.index.values.tolist()
+    line_chart.x_labels_major = df_state_tot.index.values.tolist()[0::date_skip]
+    line_chart.add('Total Hospitalized', df_state_tot.hospitalizations.values.tolist(),
                    stroke_style={'dasharray': '3, 6', 'width':2.5})
 
     return line_chart.render_response()
