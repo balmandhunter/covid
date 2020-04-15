@@ -292,7 +292,6 @@ def plot_age_range(size):
 def plot_case_status(size):
     if size == 'small':
         custom_style = small_style_bar()
-        date_skip = 4
         date_rot = 30
         leg_pos = True
         space_sz = 30
@@ -301,7 +300,6 @@ def plot_case_status(size):
     else:
         custom_style = large_style_bar()
         date_rot = 30
-        date_skip = 6
         leg_pos = False
         space_sz = 18
         the_height=600
@@ -327,7 +325,8 @@ def plot_case_status(size):
                                  )
     bar_chart.title = 'Maine COVID-19 Cases by Status'
     bar_chart.x_labels = df_state_tot.index.values.tolist()
-    bar_chart.x_labels_major = df_state_tot.index.values.tolist()[0::date_skip]
+    x_skip = len(df_state_tot.index.values)//4
+    bar_chart.x_labels_major = df_state_tot.index.values.tolist()[0::x_skip]
 
     bar_chart.add('Active Cases', df_state_tot.active_cases.values.tolist())
     bar_chart.add('Deaths', df_state_tot.deaths.values.tolist())
@@ -342,10 +341,8 @@ def plot_new_cases(size):
     if size == 'small':
         custom_style = small_style_bar()
         custom_style.title_font_size = 26
-        date_skip = 6
     else:
         custom_style = large_style_bar()
-        date_skip = 6
 
     # make a df with the total cases, deaths for each day
     df_state_tot = (get_maine_df()
@@ -363,6 +360,7 @@ def plot_new_cases(size):
                           y_title = 'Number of New Cases')
     bar_chart.title = 'New COVID-19 Cases in Maine per Day'
     bar_chart.x_labels = df_state_tot.index.values.tolist()
+    date_skip = len(df_state_tot.index.values)//4
     bar_chart.x_labels_major = df_state_tot.index.values.tolist()[0::date_skip]
     bar_chart.add('Number of New Cases', df_state_tot.new_cases.to_list())
 
@@ -375,10 +373,8 @@ def plot_deaths(size):
     if size == 'small':
         custom_style = small_style_bar()
         custom_style.title_font_size = 26
-        date_skip = 6
     else:
         custom_style = large_style_bar()
-        date_skip = 6
 
     # make a df with the total cases, deaths for each day
     df_state_tot = (get_maine_df()
@@ -393,6 +389,7 @@ def plot_deaths(size):
     bar_chart.title = 'Total COVID-19 Deaths in Maine'
     dates = df_state_tot.index.values.tolist()
     bar_chart.x_labels = dates
+    date_skip = len(dates)//4
     bar_chart.x_labels_major = dates[0::date_skip]
 
     bar_chart.add('Total Deaths', df_state_tot.deaths.values.tolist())
@@ -406,10 +403,8 @@ def plot_new_deaths(size):
     if size == 'small':
         custom_style = small_style_bar()
         custom_style.title_font_size = 26
-        date_skip = 7
     else:
         custom_style = large_style_bar()
-        date_skip = 6
 
     # make a df with the total cases, deaths for each day
     df_state_tot = (get_maine_df()
@@ -426,6 +421,7 @@ def plot_new_deaths(size):
     bar_chart.title = 'New COVID-19 Deaths in Maine per Day'
     dates = df_state_tot.index.values.tolist()
     bar_chart.x_labels = dates
+    date_skip = len(dates)//4
     bar_chart.x_labels_major = dates[0::date_skip]
     bar_chart.add('Number of New Deaths', df_state_tot.new_deaths.to_list())
 
@@ -589,13 +585,11 @@ def plot_growth_by_county(size):
     config = line_config(size)
     dates = list(df_maine.date.unique())
     if size == 'small':
-        date_skip = 7
         the_height = 800
         the_width = 600
         leg_pos = True
         space_sz = 26
     else:
-        date_skip = 7
         the_height = 500
         the_width = 700
         leg_pos = False
@@ -612,6 +606,7 @@ def plot_growth_by_county(size):
                             show_dots=False)
     line_chart.title = 'COVID-19 Case Growth by County'
     line_chart.x_labels = list(df_maine.date.unique())
+    date_skip = len(df_maine.date.unique())//3
     line_chart.x_labels_major = list(df_maine.date.unique())[0::date_skip]
     #add a line for each county
     plot_county_lines(df_maine, line_chart)
@@ -626,13 +621,11 @@ def plot_growth_by_county_log(size):
     config = line_config(size)
     dates = list(df_maine.date.unique())
     if size == 'small':
-        date_skip = 7
         the_height = 1100
         the_width = 600
         leg_pos = True
         space_sz = 26
     else:
-        date_skip = 6
         the_height = 500
         the_width = 800
         leg_pos = False
@@ -656,6 +649,7 @@ def plot_growth_by_county_log(size):
                             )
     line_chart.title = 'COVID-19 Case Growth by County (log scale)'
     line_chart.x_labels = list(df_maine.date.unique())
+    date_skip = len(df_maine.date.unique())//3
     line_chart.x_labels_major = list(df_maine.date.unique())[0::date_skip]
     #add a line for each county
     plot_county_lines(df_maine, line_chart)
@@ -678,14 +672,12 @@ def plot_hospitalization(size):
 
     if size == 'small':
         leg_pos = True
-        date_skip = 5
         space_sz = 38
         custom_style.legend_font_size = 28
         custom_style.title_font_size = 30
         custom_style.major_label_font_size=26
     else:
         leg_pos=False
-        date_skip = 5
         space_sz = 20
         custom_style.legend_font_size = 18
 
@@ -704,7 +696,9 @@ def plot_hospitalization(size):
                             spacing=space_sz,
                             legend_at_bottom_columns=2)
     line_chart.title = 'Total Patients Ever Hospitalized for COVID-19 in Maine'
-    line_chart.x_labels = df_state_tot.index.values.tolist()
+    dates = df_state_tot.index.values.tolist()
+    line_chart.x_labels = dates
+    date_skip = len(dates)//4
     line_chart.x_labels_major = df_state_tot.index.values.tolist()[0::date_skip]
     line_chart.add('Total Hospitalized', df_state_tot.hospitalizations.values.tolist(),
                    stroke_style={'dasharray': '3, 6', 'width':2.5})
@@ -718,7 +712,6 @@ def plot_ventilators(size):
     custom_style = get_custom_style_assets(size)
 
     if size == 'small':
-        date_skip = 6
         space_sz = 34
         custom_style.colors=['#08519c', '#3182bd', '#6baed6']
         the_width=700
@@ -726,7 +719,6 @@ def plot_ventilators(size):
         custom_style.title_font_size = 28
         custom_style.legend_font_size = 22
     else:
-        date_skip = 5
         space_sz = 24
         custom_style.legend_font_size= 14
         custom_style.colors=['#08519c', '#3182bd', '#6baed6']
@@ -750,7 +742,9 @@ def plot_ventilators(size):
                            )
 
     line_chart.title = 'Statewide Ventilator Availablity'
-    line_chart.x_labels = hosp_assets_dict['date']
+    dates = hosp_assets_dict['date']
+    line_chart.x_labels = dates
+    date_skip = len(dates)//3
     line_chart.x_labels_major = hosp_assets_dict['date'][0::date_skip]
 
     line_chart.add('Total Ventilators (including alternative)', hosp_assets_dict['total_vent_including_alt'],
@@ -795,8 +789,9 @@ def plot_icu_beds(size):
                             width=the_width,
                             )
     line_chart.title = 'Statewide ICU Bed Availablity'
-    line_chart.x_labels = hosp_assets_dict['date']
-    date_skip = 5
+    dates = hosp_assets_dict['date']
+    line_chart.x_labels = dates
+    date_skip = len(dates)//3
     line_chart.x_labels_major = hosp_assets_dict['date'][0::date_skip]
 
     line_chart.add('Total ICU Beds', hosp_assets_dict['total_icu_beds'], stroke_style={'width':2.5},
