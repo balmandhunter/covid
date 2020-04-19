@@ -63,14 +63,16 @@ def create_days_to_double_data(df, days_to_double):
 
 def plot_county_lines(df_maine, line_chart):
     for county in df_maine.county.unique():
-        if len(list(df_maine.date.unique())) == len(df_maine[df_maine.county==county].confirmed):
-            case_data = df_maine[df_maine.county==county].confirmed
-        else:
-            len_diff = len(list(df_maine.date.unique())) - \
-                        len(df_maine[df_maine.county==county].confirmed)
-            case_data = df_maine[df_maine.county==county].confirmed.to_list()
-            case_data = [0]*len_diff + case_data
-        line_chart.add(county, case_data, stroke_style={'width':1.75})
+        if county != 'Unknown':
+            if len(list(df_maine.date.unique())) == len(df_maine[df_maine.county==county].confirmed):
+                case_data = df_maine[df_maine.county==county].confirmed
+            else:
+                len_diff = len(list(df_maine.date.unique())) - \
+                            len(df_maine[df_maine.county==county].confirmed)
+                case_data = df_maine[df_maine.county==county].confirmed.to_list()
+                case_data = [0]*len_diff + case_data
+            # dd the data for each county tp the plot
+            line_chart.add(county, case_data, stroke_style={'width':1.75})
 
 
 def find_occupied_assets(the_dict, total_asset, available_asset, return_col_name='occupied'):
@@ -186,7 +188,7 @@ def get_custom_style(size):
         custom_style = Style(
             colors=['#85144B', '#111111', '#7FDBFF', '#39CCCC', '#3D9970', '#2ECC40', '#01FF70',
                     '#FFDC00', '#FF851B', '#FF4136', '#F012BE', '#B10DC9', '#00008b', '#0074D9',
-                    '#85144B', '#7FDBFF', '#C0C0C0', '#A9A9A9', '#696969'],
+                    '#85144B', '#C0C0C0', '#A9A9A9', '#696969'],
             label_font_size=18,
             major_guide_stroke_dasharray= '1.5,1.5',
             title_font_size=24,
@@ -198,7 +200,7 @@ def get_custom_style(size):
         custom_style = Style(
             colors=['#85144B', '#111111', '#7FDBFF', '#39CCCC', '#3D9970', '#2ECC40', '#01FF70',
                     '#FFDC00', '#FF851B', '#FF4136', '#F012BE', '#B10DC9', '#00008b', '#0074D9',
-                    '#85144B', '#7FDBFF', '#C0C0C0', '#A9A9A9', '#696969'],
+                    '#85144B', '#C0C0C0', '#A9A9A9', '#696969'],
             label_font_size=12,
             major_guide_stroke_dasharray= '1.5,1.5',
             title_font_size=18,
@@ -652,7 +654,8 @@ def plot_growth_by_county_log(size):
                             legend_at_bottom=leg_pos,
                             spacing=space_sz,
                             legend_at_bottom_columns=1,
-                            show_dots=False
+                            show_dots=False,
+                            range=(0, int(df_maine.confirmed.max()))
                             )
     line_chart.title = 'COVID-19 Case Growth by County (log scale)'
     line_chart.x_labels = list(df_maine.date.unique())
@@ -662,11 +665,11 @@ def plot_growth_by_county_log(size):
     plot_county_lines(df_maine, line_chart)
     # Set the stoke style for the reference lines and plot them
     ref_style = stroke_style={'width':3}
-    line_chart.add('Cases Double every 3 Days', create_days_to_double_data(df_maine, 3),
-                  stroke_style=ref_style)
     line_chart.add('Cases Double every 5 Days', create_days_to_double_data(df_maine, 5),
-                   stroke_style=ref_style)
+                  stroke_style=ref_style)
     line_chart.add('Cases Double every Week', create_days_to_double_data(df_maine, 7),
+                   stroke_style=ref_style)
+    line_chart.add('Cases Double every 10 Days', create_days_to_double_data(df_maine, 10),
                    stroke_style=ref_style)
 
     return line_chart.render_response()
