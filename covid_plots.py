@@ -36,8 +36,40 @@ def get_most_recent_data():
     return df_maine_today
 
 
+# Create a class extending Graph
+class LineBar(Graph):
+    # All the series are bar except the last which is line
+    def _plot(self):
+        for i, serie in enumerate(self.series, 1):
+            if i == len(self.series):
+                self.line(serie)
+            else:
+                self.bar(serie)
+
+# Add bar properties
+LineBar.bar = pygal.Bar.bar
+LineBar._compute = pygal.Bar._compute
+LineBar._bar = pygal.Bar._bar
+LineBar._series_margin = pygal.Bar._series_margin
+LineBar._serie_margin = pygal.Bar._serie_margin
+LineBar._tooltip_and_print_values = pygal.Bar._tooltip_and_print_values
+
+# Add line properties
+LineBar.line = pygal.Line.line
+LineBar._fill = pygal.Line._fill
+LineBar._self_close = False
+LineBar.stroke_style = {'width':10.5}
+
+
 def format_date_str(df):
     date_list = df.index.values.tolist()
+    dates = []
+    for date_ in date_list:
+        dates.append(date_[-5:-3] + '/' + date_[-2:])
+    return dates
+
+
+def format_date_str_list(date_list):
     dates = []
     for date_ in date_list:
         dates.append(date_[-5:-3] + '/' + date_[-2:])
@@ -343,9 +375,10 @@ def plot_case_status(size):
                                  width=the_width
                                  )
     bar_chart.title = 'Maine COVID-19 Cases by Status'
-    bar_chart.x_labels = df_state_tot.index.values.tolist()
-    x_skip = len(df_state_tot.index.values)//4
-    bar_chart.x_labels_major = df_state_tot.index.values.tolist()[0::x_skip]
+    dates = format_date_str(df_state_tot)
+    bar_chart.x_labels = dates
+    x_skip = len(dates)//4
+    bar_chart.x_labels_major = dates[0::x_skip]
 
     bar_chart.add('Active Cases', df_state_tot.active_cases.values.tolist())
     bar_chart.add('Deaths', df_state_tot.deaths.values.tolist())
@@ -357,30 +390,6 @@ def plot_case_status(size):
 @app.route('/new_cases_maine.svg')
 @sizes
 def plot_new_cases(size):
-    # Create a class extending Graph
-    class LineBar(Graph):
-        # All the series are bar except the last which is line
-        def _plot(self):
-            for i, serie in enumerate(self.series, 1):
-                if i == len(self.series):
-                    self.line(serie)
-                else:
-                    self.bar(serie)
-
-    # Add bar properties
-    LineBar.bar = pygal.Bar.bar
-    LineBar._compute = pygal.Bar._compute
-    LineBar._bar = pygal.Bar._bar
-    LineBar._series_margin = pygal.Bar._series_margin
-    LineBar._serie_margin = pygal.Bar._serie_margin
-    LineBar._tooltip_and_print_values = pygal.Bar._tooltip_and_print_values
-
-    # Add line properties
-    LineBar.line = pygal.Line.line
-    LineBar._fill = pygal.Line._fill
-    LineBar._self_close = False
-    LineBar.stroke_style = {'width':10.5}
-
     if size == 'small':
         custom_style = small_style_bar()
         space_sz = 34
@@ -462,12 +471,12 @@ def plot_deaths(size):
 
     # plot death data
     bar_chart = pygal.Bar(style=custom_style,
-                          x_label_rotation=20,
+                          x_label_rotation=30,
                           show_minor_x_labels=False,
                           show_legend=False,
                           y_title='Total Number of Deaths')
     bar_chart.title = 'Total COVID-19 Deaths in Maine'
-    dates = df_state_tot.index.values.tolist()
+    dates = format_date_str(df_state_tot)
     bar_chart.x_labels = dates
     date_skip = len(dates)//4
     bar_chart.x_labels_major = dates[0::date_skip]
@@ -494,12 +503,12 @@ def plot_new_deaths(size):
     df_state_tot['new_deaths'][0] = 0
 
     bar_chart = pygal.Bar(style=custom_style,
-                          x_label_rotation=20,
+                          x_label_rotation=30,
                           show_minor_x_labels=False,
                           show_legend=False,
                           y_title = 'Number of New Deaths')
     bar_chart.title = 'New COVID-19 Deaths in Maine per Day'
-    dates = df_state_tot.index.values.tolist()
+    dates = format_date_str(df_state_tot)
     bar_chart.x_labels = dates
     date_skip = len(dates)//4
     bar_chart.x_labels_major = dates[0::date_skip]
@@ -685,9 +694,10 @@ def plot_growth_by_county(size):
                             legend_at_bottom_columns=2,
                             show_dots=False)
     line_chart.title = 'COVID-19 Case Growth by County'
-    line_chart.x_labels = list(df_maine.date.unique())
-    date_skip = len(df_maine.date.unique())//3
-    line_chart.x_labels_major = list(df_maine.date.unique())[0::date_skip]
+    dates = format_date_str_list(dates)
+    line_chart.x_labels = dates
+    date_skip = len(dates)//3
+    line_chart.x_labels_major = dates[0::date_skip]
     #add a line for each county
     plot_county_lines(df_maine, line_chart)
 
@@ -729,9 +739,10 @@ def plot_growth_by_county_log(size):
                             range=(0, int(df_maine.confirmed.max()))
                             )
     line_chart.title = 'COVID-19 Case Growth by County (log scale)'
-    line_chart.x_labels = list(df_maine.date.unique())
-    date_skip = len(df_maine.date.unique())//3
-    line_chart.x_labels_major = list(df_maine.date.unique())[0::date_skip]
+    dates = format_date_str_list(dates)
+    line_chart.x_labels = dates
+    date_skip = len(dates)//3
+    line_chart.x_labels_major = dates[0::date_skip]
     #add a line for each county
     plot_county_lines(df_maine, line_chart)
     # Set the stoke style for the reference lines and plot them
@@ -793,24 +804,26 @@ def plot_ventilators(size):
     custom_style = get_custom_style_assets(size)
 
     if size == 'small':
-        space_sz = 34
+        space_sz = 40
         custom_style.colors=['#08519c', '#3182bd', '#6baed6']
         the_width=700
         the_height=800
         custom_style.title_font_size = 28
         custom_style.legend_font_size = 22
+        x_rot=45
     else:
         space_sz = 24
         custom_style.legend_font_size= 14
         custom_style.colors=['#08519c', '#3182bd', '#6baed6']
         the_width=550
         the_height=500
+        x_rot=30
 
     hosp_assets_dict = create_hospital_assets_dict()
 
     line_chart = pygal.Line(style=custom_style,
                             dots_size=2,
-                            x_label_rotation=20,
+                            x_label_rotation=x_rot,
                             show_minor_x_labels=False,
                             y_labels_major_every=2,
                             show_minor_y_labels=False,
@@ -823,10 +836,10 @@ def plot_ventilators(size):
                            )
 
     line_chart.title = 'Statewide Ventilator Availablity'
-    dates = hosp_assets_dict['date']
+    dates = format_date_str_list(hosp_assets_dict['date'])
     line_chart.x_labels = dates
-    date_skip = len(dates)//3
-    line_chart.x_labels_major = hosp_assets_dict['date'][0::date_skip]
+    date_skip = len(dates)//4
+    line_chart.x_labels_major = dates[0::date_skip]
 
     line_chart.add('Total Ventilators (including alternative)', hosp_assets_dict['total_vent_including_alt'],
                    stroke_style={'width':2.5}, show_dots=1, dots_size=1)
@@ -849,16 +862,18 @@ def plot_icu_beds(size):
         the_height=800
         custom_style.legend_font_size = 26
         custom_style.title_font_size = 28
+        x_rot=45
     else:
         space_sz = 24
         the_width=550
         the_height=500
+        x_rot=30
 
     hosp_assets_dict = create_hospital_assets_dict()
 
     line_chart = pygal.Line(style=custom_style,
                             dots_size=2.5,
-                            x_label_rotation=20,
+                            x_label_rotation=x_rot,
                             truncate_legend=-1,
                             show_minor_x_labels=False,
                             y_labels_major_every=2,
@@ -870,10 +885,10 @@ def plot_icu_beds(size):
                             width=the_width,
                             )
     line_chart.title = 'Statewide ICU Bed Availablity'
-    dates = hosp_assets_dict['date']
+    dates = format_date_str_list(hosp_assets_dict['date'])
     line_chart.x_labels = dates
-    date_skip = len(dates)//3
-    line_chart.x_labels_major = hosp_assets_dict['date'][0::date_skip]
+    date_skip = len(dates)//4
+    line_chart.x_labels_major = dates[0::date_skip]
 
     line_chart.add('Total ICU Beds', hosp_assets_dict['total_icu_beds'], stroke_style={'width':2.5},
                    show_dots=1, dots_size=1)
