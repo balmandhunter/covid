@@ -810,3 +810,63 @@ def plot_icu_beds(size):
                    stroke_style={'dasharray': '3, 6', 'width':2.5})
 
     return line_chart.render_response()
+
+
+@app.route('/moving_avg_new_cases.svg')
+@sizes
+def plot_moving_avg_new_cases(size):
+    custom_style = get_custom_style_assets(size)
+
+    if size == 'small':
+        space_sz = 34
+        the_width=700
+        the_height=800
+        custom_style.legend_font_size = 26
+        custom_style.title_font_size = 28
+    else:
+        space_sz = 22
+        the_width=650
+        the_height=500
+        title_font_size = 16
+
+    # make a df with the total cases, deaths for each day
+    df_state_tot = (get_maine_df()
+      .pipe(combine_counties))
+
+    # calculate new cases per day
+    df_state_tot['new_cases'] = df_state_tot.confirmed.diff()
+    df_state_tot['new_cases'][0] = 1
+
+    # Calculate the 14-day moving average of new cases
+    df_state_tot['moving_avg'] = df_state_tot.new_cases.rolling(window=14).mean().round(1)
+    #Drop the first 13 days
+    df_state_tot = df_state_tot[14:]
+
+    line_chart = pygal.Line(style=custom_style,
+                            dots_size=1.5,
+                            x_label_rotation=20,
+                            truncate_legend=-1,
+                            show_minor_x_labels=False,
+                            y_labels_major_every=2,
+                            show_minor_y_labels=False,
+                            legend_at_bottom=True,
+                            spacing=space_sz,
+                            legend_at_bottom_columns=1,
+                            height=the_height,
+                            width=the_width,
+                            show_legend=False,
+                            y_title = '14-Day Avg. of New Daily Cases',
+                            include_x_axis=True
+                            )
+    line_chart.title = 'Average Number of New Cases/Day over the Past 14 Days'
+    dates = df_state_tot.index.values.tolist()
+    line_chart.x_labels = dates
+    date_skip = len(dates)//3
+    line_chart.x_labels_major = dates[0::date_skip]
+
+    line_chart.add('14-Day Average of New Daily Cases',
+                    df_state_tot.moving_avg.to_list(),
+                    stroke_style={'width':1.5})
+
+
+    return line_chart.render_response()
