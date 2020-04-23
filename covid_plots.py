@@ -6,10 +6,12 @@ from pygal.style import Style
 import os, ssl
 import numpy as np
 from pygal.style import Style
+from pygal.graph.graph import Graph
 
 from middleware import sizes
 
 app = Flask(__name__)
+
 
 def get_maine_df():
     ''' Make a df for just the Maine data from the API'''
@@ -32,6 +34,14 @@ def get_most_recent_data():
     # sort the df by case count
     df_maine_today.sort_values(by=['confirmed'], ascending=False, inplace=True)
     return df_maine_today
+
+
+def format_date_str(df):
+    date_list = df.index.values.tolist()
+    dates = []
+    for date_ in date_list:
+        dates.append(date_[-5:-3] + '/' + date_[-2:])
+    return dates
 
 
 def create_population_df():
@@ -347,11 +357,47 @@ def plot_case_status(size):
 @app.route('/new_cases_maine.svg')
 @sizes
 def plot_new_cases(size):
+    # Create a class extending Graph
+    class LineBar(Graph):
+        # All the series are bar except the last which is line
+        def _plot(self):
+            for i, serie in enumerate(self.series, 1):
+                if i == len(self.series):
+                    self.line(serie)
+                else:
+                    self.bar(serie)
+
+    # Add bar properties
+    LineBar.bar = pygal.Bar.bar
+    LineBar._compute = pygal.Bar._compute
+    LineBar._bar = pygal.Bar._bar
+    LineBar._series_margin = pygal.Bar._series_margin
+    LineBar._serie_margin = pygal.Bar._serie_margin
+    LineBar._tooltip_and_print_values = pygal.Bar._tooltip_and_print_values
+
+    # Add line properties
+    LineBar.line = pygal.Line.line
+    LineBar._fill = pygal.Line._fill
+    LineBar._self_close = False
+    LineBar.stroke_style = {'width':10.5}
+
     if size == 'small':
         custom_style = small_style_bar()
-        custom_style.title_font_size = 26
+        space_sz = 34
+        custom_style.title_font_size = 28
+        custom_style.legend_font_size = 24
+        custom_style.title_font_size = 24
+        the_height = 800
+        the_width = 600
+        leg_pos = True
     else:
         custom_style = large_style_bar()
+        space_sz = 24
+        the_height = 500
+        the_width = 800
+        leg_pos = False
+
+
 
     # make a df with the total cases, deaths for each day
     df_state_tot = (get_maine_df()
@@ -361,17 +407,42 @@ def plot_new_cases(size):
     df_state_tot['new_cases'] = df_state_tot.confirmed.diff()
     df_state_tot['new_cases'][0] = 1
 
+    # Make a df with zeroes for the 13 days before we had any cases
+    df_zeros = pd.DataFrame.from_dict({'date':['2020-02-28','2020-02-29','2020-03-01','2020-03-02','2020-03-03','2020-03-04',
+                                           '2020-03-05','2020-03-06','2020-03-07','2020-03-08','2020-03-09',
+                                           '2020-03-10','2020-03-11'],
+                                   'deaths':[0]*13,
+                                   'fips':[0]*13,
+                                   'cases':[0]*13,
+                                   'new_cases':[0]*13})
+    df_zeros.set_index('date', inplace=True)
+    # Append that df to the cases df
+    df_state_tot = pd.concat([df_zeros, df_state_tot], sort=True)
+
+    # Calculate the 14-day moving average of new cases
+    df_state_tot['moving_avg'] = df_state_tot.new_cases.rolling(window=14).mean().round(1)
+    #Drop the first 13 days
+    df_state_tot = df_state_tot[14:]
+
     # plot new cases per day
-    bar_chart = pygal.Bar(style=custom_style,
-                          x_label_rotation=20,
-                          show_minor_x_labels=False,
-                          show_legend=False,
-                          y_title = 'Number of New Cases')
+    bar_chart = LineBar(style=custom_style,
+                        x_label_rotation=45,
+                        show_minor_x_labels=False,
+                        height=the_height,
+                        width=the_width,
+                        legend_at_bottom=leg_pos,
+                        legend_at_bottom_columns=1,
+                        spacing=space_sz
+                        )
     bar_chart.title = 'New COVID-19 Cases in Maine per Day'
-    bar_chart.x_labels = df_state_tot.index.values.tolist()
-    date_skip = len(df_state_tot.index.values)//4
-    bar_chart.x_labels_major = df_state_tot.index.values.tolist()[0::date_skip]
-    bar_chart.add('Number of New Cases', df_state_tot.new_cases.to_list())
+    dates = format_date_str(df_state_tot)
+    bar_chart.x_labels = dates
+    date_skip = len(dates)//4
+    bar_chart.x_labels_major = dates[0::date_skip]
+    bar_chart.add('Cases', df_state_tot.new_cases.to_list())
+    bar_chart.add('14-Day Average',
+                        df_state_tot.moving_avg.to_list(),
+                        stroke_style={'width':2.5}, show_dots=False)
 
     return bar_chart.render_response()
 
@@ -808,65 +879,5 @@ def plot_icu_beds(size):
                    show_dots=1, dots_size=1)
     line_chart.add('Occupied ICU Beds', hosp_assets_dict['occupied_icu_beds'],
                    stroke_style={'dasharray': '3, 6', 'width':2.5})
-
-    return line_chart.render_response()
-
-
-@app.route('/moving_avg_new_cases.svg')
-@sizes
-def plot_moving_avg_new_cases(size):
-    custom_style = get_custom_style_assets(size)
-
-    if size == 'small':
-        space_sz = 34
-        the_width=700
-        the_height=800
-        custom_style.legend_font_size = 26
-        custom_style.title_font_size = 28
-    else:
-        space_sz = 22
-        the_width=650
-        the_height=500
-        title_font_size = 16
-
-    # make a df with the total cases, deaths for each day
-    df_state_tot = (get_maine_df()
-      .pipe(combine_counties))
-
-    # calculate new cases per day
-    df_state_tot['new_cases'] = df_state_tot.confirmed.diff()
-    df_state_tot['new_cases'][0] = 1
-
-    # Calculate the 14-day moving average of new cases
-    df_state_tot['moving_avg'] = df_state_tot.new_cases.rolling(window=14).mean().round(1)
-    #Drop the first 13 days
-    df_state_tot = df_state_tot[14:]
-
-    line_chart = pygal.Line(style=custom_style,
-                            dots_size=1.5,
-                            x_label_rotation=20,
-                            truncate_legend=-1,
-                            show_minor_x_labels=False,
-                            y_labels_major_every=2,
-                            show_minor_y_labels=False,
-                            legend_at_bottom=True,
-                            spacing=space_sz,
-                            legend_at_bottom_columns=1,
-                            height=the_height,
-                            width=the_width,
-                            show_legend=False,
-                            y_title = '14-Day Avg. of New Daily Cases',
-                            include_x_axis=True
-                            )
-    line_chart.title = 'Average Number of New Cases/Day over the Past 14 Days'
-    dates = df_state_tot.index.values.tolist()
-    line_chart.x_labels = dates
-    date_skip = len(dates)//3
-    line_chart.x_labels_major = dates[0::date_skip]
-
-    line_chart.add('14-Day Average of New Daily Cases',
-                    df_state_tot.moving_avg.to_list(),
-                    stroke_style={'width':1.5})
-
 
     return line_chart.render_response()
