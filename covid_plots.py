@@ -267,8 +267,6 @@ def line_config(size):
         config.style=custom_style
         config.x_label_rotation=40
         config.show_minor_x_labels=False
-        config.y_labels_major_every=3
-        config.show_minor_y_labels=False
         config.truncate_legend=-1
     else:
         config = Config()
@@ -276,8 +274,6 @@ def line_config(size):
         config.style=custom_style
         config.x_label_rotation=20
         config.show_minor_x_labels=False
-        config.y_labels_major_every=3
-        config.show_minor_y_labels=False
         config.truncate_legend=-1
     return config
 
