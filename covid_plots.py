@@ -170,7 +170,8 @@ def create_hospital_assets_dict():
                             '2020-04-09','2020-04-10', '2020-04-11', '2020-04-12', '2020-04-13',
                             '2020-04-14', '2020-04-15', '2020-04-16', '2020-04-17', '2020-04-18',
                             '2020-04-19', '2020-04-20', '2020-04-21', '2020-04-22', '2020-04-23',
-                            '2020-04-24', '2020-04-25', '2020-04-26'],
+                            '2020-04-24', '2020-04-25', '2020-04-26', '2020-04-27', '2020-04-28',
+                            '2020-04-29'],
                          'total_icu_beds':[135, None, None, None, None,
                                            151, 151, 164, None, None,
                                            176, 190, 272, 285, 289,
@@ -178,7 +179,8 @@ def create_hospital_assets_dict():
                                            308, None, None, None, 314,
                                            None, None, 319, 321, None,
                                            320, 316, 317, 314, None,
-                                           313, None, 329],
+                                           313, None, 329, None, None,
+                                           330],
                          'available_icu_beds': [56, None, None, None, 77,
                                                 83, 86, 86, None, None,
                                                 92, 90, 124, 122, 110,
@@ -186,7 +188,8 @@ def create_hospital_assets_dict():
                                                 149, None, None, None, 158,
                                                 163, None, 158, 151, None,
                                                 167, 152, 149, 170, None,
-                                                159, None, 162],
+                                                159, None, 162, None, None,
+                                                171],
                          'total_ventilators':[291, None, None, None, None,
                                               306, 307, 308, None, None,
                                               309, 330, 348, 334, 324,
@@ -194,7 +197,8 @@ def create_hospital_assets_dict():
                                               333, None, None, None, 328,
                                               None, None, 344, 344, None,
                                               338, 336, 336, 333, None,
-                                              314, None, 315],
+                                              314, None, 315, None, None,
+                                              314],
                          'available_ventilators':[218, None, None, None, 248,
                                                   248, 250, 247, None, None,
                                                   253, 262, 271, 266, 267,
@@ -202,7 +206,8 @@ def create_hospital_assets_dict():
                                                   283, None, None, None, 283,
                                                   283, None, 313, 309, None,
                                                   297, 287, 281, 277, None,
-                                                  287, None, 296],
+                                                  287, None, 296, None, None,
+                                                  299],
                          'alternative_ventilators':[None, None, None, None, None,
                                                     None, None, 58, None, None,
                                                     87, 89, 128, 186, 199,
@@ -210,7 +215,8 @@ def create_hospital_assets_dict():
                                                     232, None, None, None, 234,
                                                     None, None, 240, 240, None,
                                                     369, 369, 369, 367, None,
-                                                    394, None, 394],
+                                                    394, None, 394, None, None,
+                                                    397],
                          'respiratory_therapists':[None, None, None, None, 84,
                                                    88, None, None, None, None,
                                                    None, None, None, None, 127,
@@ -218,7 +224,8 @@ def create_hospital_assets_dict():
                                                    None, None, None, None, None,
                                                    None, None, None, None, None,
                                                    None, None, None, None, None,
-                                                   None, None, None]
+                                                   None, None, None, None, None,
+                                                   None]
                         }
     # Calculate the number of occupied ICU Beds
     hosp_assets_dict = find_occupied_assets(hosp_assets_dict, 'total_icu_beds',
@@ -322,7 +329,7 @@ def plot_age_range(size):
     #create a df
     df_age = pd.DataFrame.from_dict({'age_range':['< 20','20s', '30s', '40s',
                                                   '50s', '60s', '70s','80+'],
-                                 'cases': [21,106,106,135,195,173,142,137]})
+                                 'cases': [23,113,108,145,202,181,146,138]})
     # add up the total cases and find % of total in each age range
     total_count = df_age.cases.sum()
     df_age['percent_of_tot'] = df_age.cases/total_count*100
@@ -334,7 +341,7 @@ def plot_age_range(size):
                           show_legend=False,
                           y_title='Percent of Cases (%)',
                           x_title='Age Group')
-    bar_chart.title = 'Case Distribution by Patient Age (April 26, 2020)'
+    bar_chart.title = 'Case Distribution by Patient Age (April 29, 2020)'
     bar_chart.x_labels = df_age.age_range
     bar_chart.add('% of Cases', df_age.percent_of_tot.to_list())
 
