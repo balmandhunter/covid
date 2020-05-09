@@ -172,7 +172,7 @@ def create_hospital_assets_dict():
                             '2020-04-19', '2020-04-20', '2020-04-21', '2020-04-22', '2020-04-23',
                             '2020-04-24', '2020-04-25', '2020-04-26', '2020-04-27', '2020-04-28',
                             '2020-04-29', '2020-04-30', '2020-05-01', '2020-05-02', '2020-05-03',
-                            '2020-05-04', '2020-05-05', '2020-05-06'],
+                            '2020-05-04', '2020-05-05', '2020-05-06', '2020-05-07', '2020-05-08'],
                          'available_icu_beds': [56, None, None, None, 77,
                                                 83, 86, 86, None, None,
                                                 92, 90, 124, 122, 110,
@@ -182,7 +182,7 @@ def create_hospital_assets_dict():
                                                 167, 152, 149, 170, None,
                                                 159, None, 162, None, None,
                                                 171, 171, 171, None, None,
-                                                141, 157, 162],
+                                                141, 157, 162, None, 137],
                          'total_icu_beds':[135, None, None, None, None,
                                            151, 151, 164, None, None,
                                            176, 190, 272, 285, 289,
@@ -192,7 +192,7 @@ def create_hospital_assets_dict():
                                            320, 316, 317, 314, None,
                                            313, None, 329, None, None,
                                            330, 330, 330, None, None,
-                                           330, 319, 320],
+                                           330, 319, 320, None, 329],
                          'available_ventilators':[218, None, None, None, 248,
                                                   248, 250, 247, None, None,
                                                   253, 262, 271, 266, 267,
@@ -202,7 +202,7 @@ def create_hospital_assets_dict():
                                                   297, 287, 281, 277, None,
                                                   287, None, 296, None, None,
                                                   299, 286, 290, None, None,
-                                                  296, 293, 288],
+                                                  296, 293, 288, None, 200],
                          'total_ventilators':[291, None, None, None, None,
                                               306, 307, 308, None, None,
                                               309, 330, 348, 334, 324,
@@ -212,7 +212,7 @@ def create_hospital_assets_dict():
                                               338, 336, 336, 333, None,
                                               314, None, 315, None, None,
                                               314, 313, 316, None, None,
-                                              319, 318, 318],
+                                              319, 318, 318, None, 319],
                          'alternative_ventilators':[None, None, None, None, None,
                                                     None, None, 58, None, None,
                                                     87, 89, 128, 186, 199,
@@ -222,7 +222,7 @@ def create_hospital_assets_dict():
                                                     369, 369, 369, 367, None,
                                                     394, None, 394, None, None,
                                                     397, 397, 397, None, None,
-                                                    395, 395, 395]
+                                                    395, 395, 395, None, 411]
                         }
     # Calculate the number of occupied ICU Beds
     hosp_assets_dict = find_occupied_assets(hosp_assets_dict, 'total_icu_beds',
@@ -326,7 +326,7 @@ def plot_age_range(size):
     #create a df
     df_age = pd.DataFrame.from_dict({'age_range':['< 20','20s', '30s', '40s',
                                                   '50s', '60s', '70s','80+'],
-                                 'cases': [30,139,140,181,247,205,164,148]})
+                                 'cases': [33,150,156,209,270,223,170,163]})
     # add up the total cases and find % of total in each age range
     total_count = df_age.cases.sum()
     df_age['percent_of_tot'] = df_age.cases/total_count*100
@@ -338,7 +338,7 @@ def plot_age_range(size):
                           show_legend=False,
                           y_title='Percent of Cases (%)',
                           x_title='Age Group')
-    bar_chart.title = 'Case Distribution by Patient Age (May 6, 2020)'
+    bar_chart.title = 'Case Distribution by Patient Age (May 8, 2020)'
     bar_chart.x_labels = df_age.age_range
     bar_chart.add('% of Cases', df_age.percent_of_tot.to_list())
 
