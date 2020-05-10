@@ -662,6 +662,8 @@ def plot_cases_per_ten_thousand_res(size):
     # Drop the Unknown county row
     unknown_idx = df_maine_today[df_maine_today.county=='Unknown'].index
     df_maine_today = df_maine_today.drop(labels=unknown_idx, axis=0)
+    #Sort the data
+    df_maine_today.sort_values(by=['cases_per_ten_thousand'], ascending=False, inplace=True)
 
     # plot the data
     bar_chart = pygal.Bar(style=custom_style,
