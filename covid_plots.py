@@ -312,6 +312,66 @@ def insert_press_herald_recovered(df):
     return df
 
 
+@app.route('/race_and_ethnicity.svg')
+@sizes
+def plot_race_and_ethnicity(size):
+    #create a df with ethnicity data
+    df_ethnicity = pd.DataFrame.from_dict({'race':['American Indian or Alaskan Native', 'Asian or Pacific Islander',
+                                                   'Black or African American', 'White', 'Two or More Races', 'Other Race'],
+                                           'perc_maine_pop': [0.6, 1.2, 1.4, 94.3, 2.2, 0.2],
+                                           'count_covid': [2, 20, 73, 829, 2, 26]
+                                           })
+
+    # calculate the percent of cases for each race and sort the df
+    df_ethnicity['perc_covid_cases'] = round(df_ethnicity.count_covid/df_ethnicity.count_covid.sum()*100, 1)
+    df_ethnicity.sort_values(by=['perc_covid_cases'], ascending=False, inplace=True)
+
+    if size == 'small':
+        custom_style = small_style_bar()
+        custom_style.title_font_size = 26
+        custom_style.label_font_size = 22
+        custom_style.tooltip_font_size = 30
+        custom_style.colors=['#3F51B5', '#009688']
+        custom_style.value_font_size=16
+        custom_style.value_colors=('#3F51B5', '#009688')
+        # Plot the data
+        bar_chart = pygal.Bar(style=custom_style,
+                                        height=900,
+                                        width=600,
+                                        legend_at_bottom=True,
+                                        legend_at_bottom_columns=1,
+                                        spacing=28,
+                                        x_label_rotation=90,
+                                        print_values=True,
+                                        print_values_position='top'
+                                        )
+        bar_chart.title = 'Case Rate by Race and Ethnicity'
+        bar_chart.x_labels = df_ethnicity.race
+        bar_chart.add('% of COVID Cases', df_ethnicity.perc_covid_cases.to_list())
+        bar_chart.add('% of Maine Population', df_ethnicity.perc_maine_pop.to_list())
+
+    else:
+        custom_style = large_style_bar()
+        custom_style.legend_font_size = 24
+        custom_style.title_font_size = 30
+        custom_style.tooltip_font_size = 20
+
+        # Plot the data
+        bar_chart = pygal.HorizontalBar(style=custom_style,
+                                        height=700,
+                                        width=1000,
+                                        legend_at_bottom=True,
+                                        legend_at_bottom_columns=1,
+                                        spacing=12
+                                        )
+        bar_chart.title = 'Case Rate by Race and Ethnicity'
+        bar_chart.x_labels = df_ethnicity.race
+        bar_chart.add('% of COVID Cases', df_ethnicity.perc_covid_cases.to_list())
+        bar_chart.add('% of Maine Population', df_ethnicity.perc_maine_pop.to_list())
+
+    return bar_chart.render_response()
+
+
 @app.route('/age_range.svg')
 @sizes
 def plot_age_range(size):
