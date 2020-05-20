@@ -501,22 +501,21 @@ def plot_new_cases(size):
     df_state_tot['new_cases'] = df_state_tot.confirmed.diff()
     df_state_tot['new_cases'][0] = 1
 
-    # Make a df with zeroes for the 13 days before we had any cases
-    df_zeros = pd.DataFrame.from_dict({'date':['2020-02-28','2020-02-29','2020-03-01','2020-03-02','2020-03-03','2020-03-04',
-                                           '2020-03-05','2020-03-06','2020-03-07','2020-03-08','2020-03-09',
+    # Make a df with zeroes for the 6 days before we had any cases
+    df_zeros = pd.DataFrame.from_dict({'date':['2020-03-06','2020-03-07','2020-03-08','2020-03-09',
                                            '2020-03-10','2020-03-11'],
-                                   'deaths':[0]*13,
-                                   'fips':[0]*13,
-                                   'cases':[0]*13,
-                                   'new_cases':[0]*13})
+                                   'deaths':[0]*6,
+                                   'fips':[0]*6,
+                                   'cases':[0]*6,
+                                   'new_cases':[0]*6})
     df_zeros.set_index('date', inplace=True)
     # Append that df to the cases df
     df_state_tot = pd.concat([df_zeros, df_state_tot], sort=True)
 
-    # Calculate the 14-day moving average of new cases
-    df_state_tot['moving_avg'] = df_state_tot.new_cases.rolling(window=14).mean().round(1)
-    #Drop the first 13 days
-    df_state_tot = df_state_tot[14:]
+    # Calculate the 7-day moving average of new cases
+    df_state_tot['moving_avg'] = df_state_tot.new_cases.rolling(window=7).mean().round(1)
+    #Drop the first 6 days
+    df_state_tot = df_state_tot[7:]
 
     # plot new cases per day
     bar_chart = LineBar(style=custom_style,
@@ -534,7 +533,7 @@ def plot_new_cases(size):
     date_skip = len(dates)//4
     bar_chart.x_labels_major = dates[0::date_skip]
     bar_chart.add('Cases', df_state_tot.new_cases.to_list())
-    bar_chart.add('14-Day Average',
+    bar_chart.add('7-Day Average',
                         df_state_tot.moving_avg.to_list(),
                         stroke_style={'width':2.5}, show_dots=False)
 
