@@ -379,6 +379,7 @@ def plot_race_and_ethnicity(size):
         custom_style.legend_font_size = 24
         custom_style.title_font_size = 30
         custom_style.tooltip_font_size = 20
+        custom_style.colors=['#009688', '#3F51B5']
 
         # Plot the data
         bar_chart = pygal.HorizontalBar(style=custom_style,
