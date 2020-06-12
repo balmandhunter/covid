@@ -176,7 +176,9 @@ def create_hospital_assets_dict():
                             '2020-05-09', '2020-05-10', '2020-05-11', '2020-05-12', '2020-05-13',
                             '2020-05-14', '2020-05-15', '2020-05-16', '2020-05-17', '2020-05-18',
                             '2020-05-19', '2020-05-20', '2020-05-21', '2020-05-22', '2020-05-23',
-                            '2020-05-24', '2020-05-25', '2020-05-26', '2020-05-27', '2020-05-28'],
+                            '2020-05-24', '2020-05-25', '2020-05-26', '2020-05-27', '2020-05-28',
+                            '2020-05-29', '2020-05-30', '2020-05-31', '2020-06-01', '2020-06-02',
+                            '2020-06-03', '2020-06-04'],
                          'available_icu_beds': [56, None, None, None, 77,
                                                 83, 86, 86, None, None,
                                                 92, 90, 124, 122, 110,
@@ -190,7 +192,9 @@ def create_hospital_assets_dict():
                                                 141, 158, 157, None, None,
                                                 163, None, 174, None, None,
                                                 185, 167, None, 164, None,
-                                                165, None, 157, 151, 148],
+                                                165, None, 157, 151, 148,
+                                                None, None, 152, 155, 156,
+                                                None, 147],
                          'total_icu_beds':[135, None, None, None, None,
                                            151, 151, 164, None, None,
                                            176, 190, 272, 285, 289,
@@ -204,7 +208,9 @@ def create_hospital_assets_dict():
                                            304, 288, 307, None, None,
                                            361, None, 360, None, None,
                                            395, 388, None, 392, None,
-                                           391, None, 394, 406, 408],
+                                           391, None, 394, 406, 408,
+                                           None, None, 395, 397, 397,
+                                           None, 398],
                          'available_ventilators':[218, None, None, None, 248,
                                                   248, 250, 247, None, None,
                                                   253, 262, 271, 266, 267,
@@ -218,7 +224,9 @@ def create_hospital_assets_dict():
                                                   220, 216, 224, None, None,
                                                   230, None, 250, None, None,
                                                   253, 253, None, 248, None,
-                                                  242, None, 238, 232, 233],
+                                                  242, None, 238, 232, 233,
+                                                  None, None, 233, 242,245,
+                                                  None, 236],
                          'total_ventilators':[291, None, None, None, None,
                                               306, 307, 308, None, None,
                                               309, 330, 348, 334, 324,
@@ -232,7 +240,9 @@ def create_hospital_assets_dict():
                                               317, 308, 310, None, None,
                                               313, None, 311, None, None,
                                               314, 316, None, 318, None,
-                                              316, None, 315, 315, 319],
+                                              316, None, 315, 315, 319,
+                                              None, None, 319, 317, 317,
+                                              None, 315],
                          'alternative_ventilators':[None, None, None, None, None,
                                                     None, None, 58, None, None,
                                                     87, 89, 128, 186, 199,
@@ -246,7 +256,9 @@ def create_hospital_assets_dict():
                                                     413, 413, 413, None, None,
                                                     416, None, 426, None, None,
                                                     439, 439, None, 439, None,
-                                                    439, None, 439, 439, 441]
+                                                    439, None, 439, 439, 441,
+                                                    None, None, 441, 441, 441,
+                                                    None, 441]
                         }
     # Calculate the number of occupied ICU Beds
     hosp_assets_dict = find_occupied_assets(hosp_assets_dict, 'total_icu_beds',
@@ -265,7 +277,7 @@ def create_ethnicity_df():
     df_ethnicity = pd.DataFrame.from_dict({'race':['American Indian or Alaskan Native', 'Asian or Pacific Islander',
                                                    'Black or African American', 'White', 'Two or More Races', 'Other Race'],
                                            'perc_maine_pop': [0.6, 1.2, 1.4, 94.3, 2.2, 0.2],
-                                           'count_covid': [3, 29, 350, 1303, 10, 49]
+                                           'count_covid': [7, 39, 579, 1626, 12, 55]
                                            })
 
     # calculate the percent of cases for each race and sort the df
@@ -300,6 +312,30 @@ def get_custom_style(size):
             stroke_opacity=0.6
         )
     return custom_style
+
+def create_hospitalized_dict():
+    hospitalized_dict = {'date':['2020-04-10', '2020-04-11', '2020-04-12', '2020-04-13',
+                            '2020-04-14', '2020-04-15', '2020-04-16', '2020-04-17', '2020-04-18',
+                            '2020-04-19', '2020-04-20', '2020-04-21', '2020-04-22', '2020-04-23',
+                            '2020-04-24', '2020-04-25', '2020-04-26', '2020-04-27', '2020-04-28',
+                            '2020-04-29', '2020-04-30', '2020-05-01', '2020-05-02', '2020-05-03',
+                            '2020-05-04', '2020-05-05', '2020-05-06', '2020-05-07', '2020-05-08',
+                            '2020-05-09', '2020-05-10', '2020-05-11', '2020-05-12', '2020-05-13',
+                            '2020-05-14', '2020-05-15', '2020-05-16', '2020-05-17', '2020-05-18',
+                            '2020-05-19', '2020-05-20', '2020-05-21', '2020-05-22', '2020-05-23',
+                            '2020-05-24', '2020-05-25', '2020-05-26', '2020-05-27', '2020-05-28'],
+                        'icu':[20, None, None, None,
+                               21, 22, 20, 27, 29,
+                               18, 16, 16, 18, 18,
+                               17, 17, 19, 16, 17,
+                               17, 18, 17, 19, 18,
+                               18, 18, 18, 16, 23,
+                               22, 17, 17, 17, 20,
+                               18, 16, 19, 19, 16,
+                               19, 24, 21, 21, 26,
+                               27, 26, 26, 25, 22],
+                        'non_icu':[],
+                        'ventilator':[]}
 
 
 def line_config(size):
@@ -395,7 +431,7 @@ def plot_race_and_ethnicity(size):
                                         legend_at_bottom_columns=1,
                                         spacing=12
                                         )
-        bar_chart.title = 'Case Rate by Race and Ethnicity (May 27, 2020)'
+        bar_chart.title = 'Case Rate by Race and Ethnicity (June 11, 2020)'
         bar_chart.x_labels = df_ethnicity.race
         bar_chart.add('% of COVID Cases', df_ethnicity.perc_covid_cases.to_list())
         bar_chart.add('% of Maine Population', df_ethnicity.perc_maine_pop.to_list())
@@ -455,7 +491,7 @@ def plot_age_range(size):
     #create a df
     df_age = pd.DataFrame.from_dict({'age_range':['< 20','20s', '30s', '40s',
                                                   '50s', '60s', '70s','80+'],
-                                 'cases': [101,281,298,339,402,302,230,236]})
+                                 'cases': [133,336,358,378,429,322,239,251]})
     # add up the total cases and find % of total in each age range
     total_count = df_age.cases.sum()
     df_age['percent_of_tot'] = df_age.cases/total_count*100
@@ -467,7 +503,7 @@ def plot_age_range(size):
                           show_legend=False,
                           y_title='Percent of Cases (%)',
                           x_title='Age Group')
-    bar_chart.title = 'Case Distribution by Patient Age (May 28, 2020)'
+    bar_chart.title = 'Case Distribution by Patient Age (June 4, 2020)'
     bar_chart.x_labels = df_age.age_range
     bar_chart.add('% of Cases', df_age.percent_of_tot.to_list())
 
